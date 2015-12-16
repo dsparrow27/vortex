@@ -15,15 +15,9 @@ class TestNode(unittest.TestCase):
 
     def testGetPlug(self):
         self.node.addPlug(self.plug)
-        self.assertEquals(len(self.node.getPlug("testPlug")), 1)
+        self.assertEquals(self.node.getPlug("testPlug"), self.plug)
         self.node.deletePlug(self.plug)
-        self.assertEquals(len(self.node.getPlug("testPlug")), 0)
-
-    def testGetInputs(self):
-        pass
-
-    def testGetOutputs(self):
-        pass
+        self.assertEquals(self.node.getPlug("testPlug"), None)
 
 
 if __name__ == "__main__":

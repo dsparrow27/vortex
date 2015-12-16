@@ -5,6 +5,9 @@ logging.getLogger(__name__)
 
 class Graph(object):
     def __init__(self, name=""):
+        """
+        :param name: str, the name of the graph to set
+        """
         self._name = name
         self._nodes = set()
 
@@ -24,6 +27,9 @@ class Graph(object):
 
     @property
     def nodes(self):
+        """Returns all the nodes in the graph
+        :return:
+        """
         return self._nodes
 
     def hasNode(self, node):
@@ -34,26 +40,34 @@ class Graph(object):
         return node in self._nodes
 
     def deleteNode(self, node):
+        """Removes a node from the graph
+        :param node:
+        """
         self._nodes.discard(node)
 
     def getNode(self, nodeName):
+        """Returns a node based on the name or empty list
+        :param nodeName:
+        :return:
+        """
         return [item for item in self._nodes if item.name == nodeName]
 
     def clear(self):
-        """
-        :return:
+        """Clears all the nodes from the graph
+        :return: None
         """
         self._nodes.clear()
 
     def allLeaves(self):
+        """Returns all the leaf nodes in the graph, a Leaf node is any node that has on connections
+        :return: list(Node)
+        """
         leafNodes = []
         for node in self._nodes:
             if any(plug.connections for plug in node.plugs):
                 continue
             leafNodes.append(node)
-
-        if not leafNodes:
-            return None
+        return leafNodes
 
     def compute(self):
         for node in self._nodes:

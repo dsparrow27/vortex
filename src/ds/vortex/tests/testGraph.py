@@ -1,6 +1,6 @@
 import unittest
 from ds.vortex.core import baseNode
-from ds.vortex.core import basePlug
+from ds.vortex.core import basePlug as plugs
 from ds.vortex.core import graph
 
 
@@ -9,14 +9,10 @@ class TestGraph(unittest.TestCase):
         self.graph = graph.Graph(name="testGraph")
         self.testNode = baseNode.BaseNode("testNode")
         self.testNode2 = baseNode.BaseNode("testNode1")
-        self.inputPlug = basePlug.BasePlug("testInput", self.testNode, attributeType=float, io="input")
-        self.outputPlug = basePlug.BasePlug("testOutput", self.testNode, attributeType=float, io="output")
-        self.node2inputPlug = basePlug.BasePlug("testInput", self.testNode2, attributeType=float, io="input")
-        self.node2OutputPlug = basePlug.BasePlug("testOutput", self.testNode2, attributeType=float, io="output")
-        self.testNode.addPlug(self.inputPlug)
-        self.testNode.addPlug(self.outputPlug)
-        self.testNode2.addPlug(self.inputPlug)
-        self.testNode2.addPlug(self.outputPlug)
+        self.testNode.addPlug(plugs.BasePlug("testInput", self.testNode))
+        self.testNode.addPlug(plugs.BasePlug("testOutput", self.testNode))
+        self.testNode2.addPlug(plugs.BasePlug("testInput1", self.testNode2))
+        self.testNode2.addPlug(plugs.BasePlug("testOutput1", self.testNode2))
 
     def testAddNode(self):
         self.assertEquals(self.graph.addNode(self.testNode), self.testNode)
@@ -42,13 +38,14 @@ class TestGraph(unittest.TestCase):
     def testGraphAllLeaves(self):
         self.graph.addNode(self.testNode)
         self.graph.addNode(self.testNode2)
-        self.testNode.getPlug("testOutput").connect(self.testNode2.getPlug("testInput"))
+        self.testNode.getPlug("testOutput").connect(self.testNode2.getPlug("testInput1"))
+        self.testNode2.getPlug("testInput1").connect(self.testNode.getPlug("testOutput"))
         leafNodes = self.graph.allLeaves()
-        self.assertEquals(leafNodes, None)
-        self.node2OutputPlug.disconnect(self.outputPlug)
-        self.outputPlug.disconnect(self.node2OutputPlug)
+        self.assertEquals(leafNodes, [])
+        self.testNode.getPlug("testOutput").disconnect(self.testNode2.getPlug("testInput1"))
+        self.testNode2.getPlug("testInput1").disconnect(self.testNode.getPlug("testOutput"))
         leafNodes = self.graph.allLeaves()
-        self.assertIsNone(leafNodes)
+        self.assertEquals(len(leafNodes), 2)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

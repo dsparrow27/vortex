@@ -7,35 +7,21 @@ class BasePlug(object):
     """Base Plug class that should be a child of a node class.
     """
 
-    def __init__(self, name, node, attributeType, io="input"):
+    def __init__(self, name, node, value=None):
         """
         :param name: str, the name for the plug
         :param node: BaseNode instance, the parent node
-        :param attributeType: any python type eg, float, int etc
-        :param io: str, input or output, whether this plug is an input or output
+        :param value: anything, data storage that this plug is equal to eg. float value, gets used by the compute method in the node
         """
         self.name = name
         self._node = node
-        self._io = io
-        self._type = attributeType
+        self._io = "input"
         self._connections = set()
         self.dirty = False
+        self.value = value
 
     def __repr__(self):
         return "{}{}".format(self.__class__, self.__dict__)
-
-    def __eq__(self, other):
-        """Test the equality between two plug classes are the same, for this to return true the
-        self.type and _io needs to be the same
-        :param other: BasePlug instance
-        :return: bool
-        """
-        if not isinstance(other, BasePlug):
-            return False
-        return other.type == self._type and self._io == other.io and self._node == other.node
-
-    def __ne__(self, other):
-        return not self == other
 
     def __len__(self):
         return len(self._connections)
@@ -53,13 +39,6 @@ class BasePlug(object):
         :return: str
         """
         return self._io
-
-    @property
-    def type(self):
-        """Returns the plug type , any std type eg, float
-        :return: std types
-        """
-        return self._type
 
     @property
     def connections(self):
@@ -87,9 +66,6 @@ class BasePlug(object):
         :return: None
         """
 
-        if not self.canConnect(plug):
-            logger.error("{} is not of the same type".format(plug.name))
-            return
         if self.isInput:
             self._connections.clear()
         self._connections.add(plug)
@@ -102,17 +78,32 @@ class BasePlug(object):
             return True
         return False
 
-    def canConnect(self, plug):
-        """Test's the plug to see if its a valid plug that can be connected to self, fails if type is different or
-        io is the same
-        :param plug: Plug
-        """
-        return self.type == plug.type and self.io != plug.io
-
     def disconnect(self, plug):
         """Removes the plug from the connections list
         :param plug: baseAttribute instance
         :return: bool
         """
-
         self._connections.discard(plug)
+
+
+class InputPlug(BasePlug):
+    def __init__(self, name, node, value=None):
+        """
+        :param name: str, the name for the plug
+        :param node: BaseNode instance, the parent node
+        :param value: anything, data storage that this plug is equal to eg. float value, gets used by the compute method in the node
+        """
+        super(InputPlug, self).__init__(name, node, value)
+        self._io = "input"
+
+
+class OutputPlug(BasePlug):
+    def __init__(self, name, node, value=None):
+        """
+        :param name: str, the name for the plug
+        :param node: BaseNode instance, the parent node
+        :param value: anything, data storage that this plug is equal to eg. float value, gets used by the compute method in the node
+        """
+        super(OutputPlug, self).__init__(name, node, value)
+
+        self._io = "output"

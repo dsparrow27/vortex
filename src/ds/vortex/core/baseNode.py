@@ -1,12 +1,11 @@
-
 class BaseNode(object):
     def __init__(self, name):
         """
         :param name: str, the name of the node
-        :param value:
         """
         self.name = name
         self._plugs = set()
+        self.initialize()
 
     def __repr__(self):
         return "{}{}".format(self.__class__.__name__, self.__dict__)
@@ -53,6 +52,12 @@ class BaseNode(object):
         :return: list(Plug)
         """
         return [plug for plug in self._plugs if plug.isOutput()]
+
+    def initialize(self):
+        """Intended to be overridden
+        :return: None
+        """
+        pass
 
     def compute(self):
         """Intended to be overridden

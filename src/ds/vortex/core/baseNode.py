@@ -54,7 +54,7 @@ class BaseNode(object):
         return [plug for plug in self._plugs if plug.isOutput()]
 
     def initialize(self):
-        """Intended to be overridden
+        """Intended to be overridden, this method is for cresting plugs, for the node before this node gets computed for the first time
         :return: None
         """
         pass

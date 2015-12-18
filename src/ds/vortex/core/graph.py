@@ -14,9 +14,12 @@ class Graph(object):
     def __repr__(self):
         return "{}{}".format(self.__class__.__name__, self.__dict__)
 
+    def __len__(self):
+        return len(self._nodes)
+
     def addNode(self, node):
-        """Adds a Node instance to the graph this will also add the node to the graph class instance as a attribute which
-        can be accessed by graph.node
+        """Adds a Node instance to the graph this will also add the node to the graph class instance as a attribute
+        which can be accessed by graph.node
         :param node: Node instance, the node to add
         :return None
         """
@@ -64,11 +67,10 @@ class Graph(object):
         """
         leafNodes = []
         for node in self._nodes:
-            if any(plug.connections for plug in node.plugs):
+            if any(plug.connections for plug in node.inputs()):
                 continue
             leafNodes.append(node)
         return leafNodes
 
     def compute(self):
-        for node in self._nodes:
-            node.compute()
+        pass

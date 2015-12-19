@@ -21,3 +21,6 @@ class AddNode(baseNode.BaseNode):
     def compute(self):
         result = sum([plug.value for plug in self.inputs() if plug.value is not None])
         self.getPlug("output").value = result
+
+def getNode():
+    return AddNode

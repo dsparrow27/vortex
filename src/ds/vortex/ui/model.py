@@ -99,3 +99,7 @@ class SceneGraphModel(QtCore.QAbstractItemModel):
             parentNode = parent.internalPointer()
             child = parentNode.plugs.values()[row]
         return self.createIndex(row, column, child)
+
+
+class Mapper():
+    pass

@@ -51,9 +51,19 @@ class MainUi(mainWindow.MainWindow):
             menu.addAction(action)
             action.triggered.connect(partial(self.addNode, name))
         menu.exec_(mousePos)
-    def addNode(self, name):
-        node = self.modulesDict.get(name).get("object")
 
+    def addNode(self, name):
+        node = self.modulesDict.get(name).get("object")(name)
+        self.outliner.dataSource.addNode(node)
+        winNode = qnode.QNode(name)
+        for plugName, plug in node.plugs.iteritems():
+            if plug.isInput():
+                winNode.addInput(plug.name)
+            elif plug.isOutput():
+                winNode.addOutput(plug.name)
+        self.view.addItem(winNode)
+        print self.outliner.dataSource.nodes
+        print self.view.items
 
     def getNodeClasses(self, path, sourceDir="src"):
         """
@@ -104,10 +114,10 @@ class Outliner(QtGui.QWidget):
         self.treeViewPlus = treeViewPlus.TreeViewPlus(parent=self)
         mainlayout.addWidget(self.treeViewPlus)
         self.dataSource = graph.Graph(name="testGraph")
-        self.dataSource.addNode(add.AddNode("test"))
-        self.dataSource.addNode(add.AddNode("test1"))
-        self.dataSource.getNode("test").getPlug("output").connect(self.dataSource.getNode("test").getPlug("input1"))
-        self.dataSource.getNode("test1").getPlug("input1").connect(self.dataSource.getNode("test").getPlug("output"))
+        # self.dataSource.addNode(add.AddNode("test"))
+        # self.dataSource.addNode(add.AddNode("test1"))
+        # self.dataSource.getNode("test").getPlug("output").connect(self.dataSource.getNode("test").getPlug("input1"))
+        # self.dataSource.getNode("test1").getPlug("input1").connect(self.dataSource.getNode("test").getPlug("output"))
         self.model = model.SceneGraphModel(self.dataSource)
         self.treeViewPlus.setSourceModel(self.model)
 

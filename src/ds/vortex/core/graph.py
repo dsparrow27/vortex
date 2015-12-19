@@ -1,4 +1,5 @@
 import logging
+from collections import OrderedDict
 
 logging.getLogger(__name__)
 
@@ -9,7 +10,7 @@ class Graph(object):
         :param name: str, the name of the graph to set
         """
         self._name = name
-        self._nodes = set()
+        self._nodes = OrderedDict()
 
     def __repr__(self):
         return "{}{}".format(self.__class__.__name__, self.__dict__)
@@ -25,7 +26,7 @@ class Graph(object):
         """
         if self.hasNode(node):
             return
-        self._nodes.add(node)
+        self._nodes[node.name] = node
         return node
 
     @property
@@ -40,20 +41,20 @@ class Graph(object):
         :param node: node instance
         :return: bool
         """
-        return node in self._nodes
+        return node.name in self._nodes
 
     def deleteNode(self, node):
         """Removes a node from the graph
         :param node:
         """
-        self._nodes.discard(node)
+        del self._nodes[node.name]
 
     def getNode(self, nodeName):
         """Returns a node based on the name or empty list
         :param nodeName:
         :return:
         """
-        return [item for item in self._nodes if item.name == nodeName]
+        return self._nodes.get(nodeName)
 
     def clear(self):
         """Clears all the nodes from the graph
@@ -66,7 +67,7 @@ class Graph(object):
         :return: list(Node)
         """
         leafNodes = []
-        for node in self._nodes:
+        for node in self._nodes.values():
             if any(plug.connections for plug in node.inputs()):
                 continue
             leafNodes.append(node)

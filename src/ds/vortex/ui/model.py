@@ -4,40 +4,58 @@
 @email : dsparrow27@gmail.com
 @website : www.david-sparrow.com
 """
-# var = {"nodeName": {"ports": {"port1":{"object": "",
-#                                        "connections":["connection1"]}}}}
 
 from PyQt4 import QtCore, QtGui
 
 
 class SceneGraphModel(QtCore.QAbstractItemModel):
-    """
-    """
-
-    def __init__(self, sceneGraph, parent=None):
+    def __init__(self, graph, parent=None):
         """
         :param root: QObject
         """
-        super(self.__class__, self).__init__(parent)
-        self.graph = sceneGraph
+        super(SceneGraphModel, self).__init__(parent)
+        self.graph = graph
 
     def rowCount(self, parent):
         """
         :param parent: QModelIndex
         """
-        return len(self.graph)
-
-    def data(self):
-        pass
-
-    def setData(self):
-        pass
+        if not parent.isValid():
+            return len(self.graph)
+        parentItem = parent.internalPointer()
+        if hasattr(parentItem, "_plugs"):
+            return len(parentItem.plugs)
+        return 0
 
     def columnCount(self, parent):
         """Returns the column count
         :param parent:
         """
         return 2
+
+    def data(self, index, role):
+        """
+        :param index:
+        :param role:
+        """
+        if not index.isValid():
+            return None
+
+        item = index.internalPointer()
+        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
+            if index.column() == 0:
+                return item.name
+            elif index.column() == 1 and hasattr(item, "_connections"):
+                return str([i.fullPath() for i in item.connections])
+
+    def setData(self, index, value, role=QtCore.Qt.EditRole):
+        if not index.isValid():
+            return False
+
+        if role == QtCore.Qt.EditRole:
+            item = index.internalPointer()
+            item.name = value.toString()
+            return True
 
     def headerData(self, section, orientation, role):
         """
@@ -49,12 +67,22 @@ class SceneGraphModel(QtCore.QAbstractItemModel):
             if section == 0:
                 return "SceneGraph"
             elif section == 1:
-                return "output"
+                return "Connections"
 
     def flags(self, index):
-        """sets the flags for the model
+        """sets the flags for the model eg. editable , if the index is 0 then not editable
         """
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        if index.column() == 0:
+            return QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        else:
+            return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+
+    def parent(self, index):
+        """Returns the parent of the node with the given index
+        :param index: QModelIndex
+        @return: QModelIndex
+        """
+        return QtCore.QModelIndex()
 
     def index(self, row, column, parent):
         """Should return the QModelIndex that corresponds to the given row, colum and parent node
@@ -64,4 +92,10 @@ class SceneGraphModel(QtCore.QAbstractItemModel):
         @return QModelIndex
         """
 
-        return QtCore.QModelIndex()
+        if not parent.isValid():
+            parentNode = self.graph
+            child = parentNode.nodes.values()[row]
+        else:
+            parentNode = parent.internalPointer()
+            child = parentNode.plugs.values()[row]
+        return self.createIndex(row, column, child)

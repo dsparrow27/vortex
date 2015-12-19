@@ -16,7 +16,7 @@ class BasePlug(object):
         self.name = name
         self._node = node
         self._io = "input"
-        self._connections = set()
+        self._connections = []
         self.dirty = False
         self.value = value
 
@@ -67,8 +67,8 @@ class BasePlug(object):
         """
 
         if self.isInput:
-            self._connections.clear()
-        self._connections.add(plug)
+            self._connections = []
+        self._connections.append(plug)
 
     def isConnected(self):
         """Returns True if self is connected to another plug
@@ -83,7 +83,28 @@ class BasePlug(object):
         :param plug: baseAttribute instance
         :return: bool
         """
-        self._connections.discard(plug)
+        del self._connections[self._connections.index(plug)]
+
+    def log(self, tabLevel=-1):
+
+        output = ""
+        tabLevel += 1
+
+        for i in range(tabLevel):
+            output += "\t"
+
+        output += "|------" + self.name + " ------connections -->> {}\n".format(self._connections)
+
+        tabLevel -= 1
+        output += "\n"
+
+        return output
+
+    def fullPath(self):
+        """Returns the fullpath of the is plug , eg nodeName|plugName
+        :return: str
+        """
+        return "{0}|{1}".format(self.node.name, self.name)
 
 
 class InputPlug(BasePlug):

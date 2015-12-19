@@ -1,10 +1,13 @@
+from collections import OrderedDict
+
+
 class BaseNode(object):
     def __init__(self, name):
         """
         :param name: str, the name of the node
         """
         self.name = name
-        self._plugs = set()
+        self._plugs = OrderedDict()
         self.initialize()
 
     def __repr__(self):
@@ -12,6 +15,9 @@ class BaseNode(object):
 
     def __eq__(self, other):
         return isinstance(other, BaseNode) and self.plugs == other.plugs
+
+    def __len__(self):
+        return len(self._ports)
 
     @property
     def plugs(self):
@@ -24,34 +30,40 @@ class BaseNode(object):
         """Adds a plug to self
         :param plug: Plug instance
         """
-        self._plugs.add(plug)
+        self._plugs[plug.name] = plug
 
     def getPlug(self, plugName):
         """Returns the plug based on the name
         :param plugName: str, the plug name to get
         :return: plug instance or None
         """
-        plugs = [plug for plug in self._plugs if plug.name == plugName]
-        if plugs:
-            return plugs[0]
+        return self._plugs.get(plugName)
 
     def deletePlug(self, plug):
         """Removes the plug from the node
         :param plug:
         """
-        self._plugs.discard(plug)
+        del self._plugs[plug.name]
 
     def inputs(self):
         """Finds and returns all the inputs for self
         :return: list(Plug)
         """
-        return [plug for plug in self._plugs if plug.isInput()]
+        inputs = []
+        for name, plug in self._plugs.iteritems():
+            if plug.isInput():
+                inputs.append(plug)
+        return inputs
 
     def outputs(self):
         """Finds and returns all the outputs for self
         :return: list(Plug)
         """
-        return [plug for plug in self._plugs if plug.isOutput()]
+        outputs = []
+        for name, plug in self._plugs.iteritems():
+            if plug.isOutput():
+                outputs.append(plug)
+        return outputs
 
     def initialize(self):
         """Intended to be overridden, this method is for cresting plugs, for the node before this node gets computed for the first time
@@ -64,3 +76,21 @@ class BaseNode(object):
         :return: None
         """
         pass
+
+    def log(self, tabLevel=-1):
+
+        output = ""
+        tabLevel += 1
+
+        for i in range(tabLevel):
+            output += "\t"
+
+        output += "|------" + self.name + "\n"
+
+        for child in self._plugs.values():
+            output += child.log(tabLevel)
+
+        tabLevel -= 1
+        output += "\n"
+
+        return output

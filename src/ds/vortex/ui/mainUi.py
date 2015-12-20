@@ -58,12 +58,11 @@ class MainUi(mainWindow.MainWindow):
         winNode = qnode.QNode(name)
         for plugName, plug in node.plugs.iteritems():
             if plug.isInput():
+                print plug.name
                 winNode.addInput(plug.name)
             elif plug.isOutput():
                 winNode.addOutput(plug.name)
         self.view.addItem(winNode)
-        print self.outliner.dataSource.nodes
-        print self.view.items
 
     def getNodeClasses(self, path, sourceDir="src"):
         """

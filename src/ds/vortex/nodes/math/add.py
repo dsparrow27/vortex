@@ -16,7 +16,7 @@ class AddNode(baseNode.BaseNode):
     def initialize(self):
         self.addPlug(plugs.InputPlug("input1", self, 0))
         self.addPlug(plugs.InputPlug("input2", self, 0))
-        self.addPlug(plugs.InputPlug("output", self))
+        self.addPlug(plugs.OutputPlug("output", self))
 
     def compute(self):
         result = sum([plug.value for plug in self.inputs() if plug.value is not None])

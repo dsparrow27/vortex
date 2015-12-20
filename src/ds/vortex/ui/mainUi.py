@@ -8,7 +8,6 @@ from ds.qt.widgets import graphicsScene
 from ds.qt.extendedWidgets import treeViewPlus
 import model
 from ds.vortex.core import graph
-from ds.vortex.nodes.math import add
 import os
 
 
@@ -58,11 +57,11 @@ class MainUi(mainWindow.MainWindow):
         winNode = qnode.QNode(name)
         for plugName, plug in node.plugs.iteritems():
             if plug.isInput():
-                print plug.name
                 winNode.addInput(plug.name)
             elif plug.isOutput():
                 winNode.addOutput(plug.name)
         self.view.addItem(winNode)
+        self.outliner.reset()
 
     def getNodeClasses(self, path, sourceDir="src"):
         """
@@ -113,15 +112,12 @@ class Outliner(QtGui.QWidget):
         self.treeViewPlus = treeViewPlus.TreeViewPlus(parent=self)
         mainlayout.addWidget(self.treeViewPlus)
         self.dataSource = graph.Graph(name="testGraph")
-        # self.dataSource.addNode(add.AddNode("test"))
-        # self.dataSource.addNode(add.AddNode("test1"))
-        # self.dataSource.getNode("test").getPlug("output").connect(self.dataSource.getNode("test").getPlug("input1"))
-        # self.dataSource.getNode("test1").getPlug("input1").connect(self.dataSource.getNode("test").getPlug("output"))
         self.model = model.SceneGraphModel(self.dataSource)
         self.treeViewPlus.setSourceModel(self.model)
 
-    def updateModel(self):
-        pass
+    def reset(self):
+        self.model.modelReset.emit()
+
 
 
 if __name__ == "__main__":
@@ -129,7 +125,5 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication(sys.argv)
     win = MainUi()
-    # source = win.outliner.dataSource
-
     win.show()
     sys.exit(app.exec_())

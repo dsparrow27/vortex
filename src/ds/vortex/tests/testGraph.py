@@ -1,6 +1,6 @@
 import unittest
 from ds.vortex.core import baseNode
-from ds.vortex.core import basePlug as plugs
+from ds.vortex.core import plug as plugs
 from ds.vortex.core import graph
 
 
@@ -42,6 +42,8 @@ class TestGraph(unittest.TestCase):
         self.testNode2.getPlug("testInput1").connect(self.testNode.getPlug("testOutput"))
         leafNodes = self.graph.allLeaves()
         self.assertEquals(len(leafNodes), 1)
+        self.assertEquals(leafNodes[0], self.testNode)
+
         self.testNode.getPlug("testOutput").disconnect(self.testNode2.getPlug("testInput1"))
         self.testNode2.getPlug("testInput1").disconnect(self.testNode.getPlug("testOutput"))
         leafNodes = self.graph.allLeaves()

@@ -1,12 +1,12 @@
 import unittest
-from ds.vortex.core import baseNode, basePlug
+from ds.vortex.core import baseNode, plug
 from ds.vortex.nodes.math import add
 
 
 class TestBaseNode(unittest.TestCase):
     def setUp(self):
         self.node = baseNode.BaseNode("testNode")
-        self.plug = basePlug.BasePlug("testPlug", self.node)
+        self.plug = plug.BasePlug("testPlug", self.node)
 
     def testAddPlug(self):
         self.node.addPlug(self.plug)

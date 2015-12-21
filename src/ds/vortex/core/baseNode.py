@@ -17,10 +17,17 @@ class BaseNode(object):
         return "{}{}".format(self.__class__.__name__, self.__dict__)
 
     def __eq__(self, other):
+        """Determines if the node and its plugs equal
+        :param other:
+        :return:
+        """
         return isinstance(other, BaseNode) and self.plugs == other.plugs
 
     def __len__(self):
-        return len(self._ports)
+        """Return the length of the plugs for this node
+        :return: int
+        """
+        return len(self._plugs)
 
     @property
     def plugs(self):
@@ -29,11 +36,13 @@ class BaseNode(object):
         """
         return self._plugs
 
-    def addPlug(self, plug):
+    def addPlug(self, plug, value=None):
         """Adds a plug to self
-        :param plug: Plug instance
+        :param plug: Plug instance to add
+        :param value: any type, This argument get passed to the plug value attribute
         """
         self._plugs[plug.name] = plug
+        plug.value = value
 
     def getPlug(self, plugName):
         """Returns the plug based on the name
@@ -81,7 +90,10 @@ class BaseNode(object):
         logger.debug("Computing {}".format(self.name))
 
     def log(self, tabLevel=-1):
-
+        """Return the hierarchy for this node including the plugs
+        :param tabLevel: int, spacing
+        :return: str
+        """
         output = ""
         tabLevel += 1
 

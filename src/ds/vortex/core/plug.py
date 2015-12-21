@@ -18,13 +18,21 @@ class BasePlug(object):
         self._io = "input"
         self._connections = []
         self.dirty = False
-        self.value = value
+        self._value = value
 
     def __repr__(self):
         return "{}{}".format(self.__class__, self.__dict__)
 
     def __len__(self):
         return len(self._connections)
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
 
     @property
     def node(self):
@@ -65,10 +73,8 @@ class BasePlug(object):
         :param plug: BasePlug instance
         :return: None
         """
-
-        if self.isInput:
-            self._connections = []
         self._connections.append(plug)
+        self.dirty = False
 
     def isConnected(self):
         """Returns True if self is connected to another plug
@@ -101,7 +107,7 @@ class BasePlug(object):
         return output
 
     def fullPath(self):
-        """Returns the fullpath of the is plug , eg nodeName|plugName
+        """Returns the fullpath of the plug , eg nodeName|plugName
         :return: str
         """
         return "{0}|{1}".format(self.node.name, self.name)
@@ -117,6 +123,10 @@ class InputPlug(BasePlug):
         super(InputPlug, self).__init__(name, node, value)
         self._io = "input"
 
+    def connect(self, plug):
+        self._connections = []
+        super(InputPlug, self).connect(plug)
+
 
 class OutputPlug(BasePlug):
     def __init__(self, name, node, value=None):
@@ -126,5 +136,19 @@ class OutputPlug(BasePlug):
         :param value: anything, data storage that this plug is equal to eg. float value, gets used by the compute method in the node
         """
         super(OutputPlug, self).__init__(name, node, value)
-
         self._io = "output"
+
+    def connect(self, plug):
+        super(OutputPlug, self).connect(plug)
+        plug.value = self.value
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+        if self.isConnected():
+            for plug in self._connections:
+                plug.value = value

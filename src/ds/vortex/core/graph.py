@@ -16,13 +16,16 @@ class Graph(object):
         return "{}{}".format(self.__class__.__name__, self.__dict__)
 
     def __len__(self):
+        """Returns the length of the nodes in the graph
+        :return:
+        """
         return len(self._nodes)
 
     def addNode(self, node):
         """Adds a Node instance to the graph this will also add the node to the graph class instance as a attribute
         which can be accessed by graph.node
         :param node: Node instance, the node to add
-        :return None
+        :return Node instance
         """
         if self.hasNode(node):
             return
@@ -75,5 +78,3 @@ class Graph(object):
 
         return leafNodes
 
-    def compute(self):
-        pass

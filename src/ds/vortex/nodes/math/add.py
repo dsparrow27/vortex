@@ -1,5 +1,5 @@
 from ds.vortex.core import baseNode
-from ds.vortex.core import basePlug as plugs
+from ds.vortex.core import plug as plugs
 
 
 class AddNode(baseNode.BaseNode):
@@ -7,6 +7,7 @@ class AddNode(baseNode.BaseNode):
     default input port names : input1, input2 (input1 + input2)
     default output port name: output.
     """
+
     def __init__(self, name):
         """
         :param name: str, the name of the node
@@ -23,5 +24,9 @@ class AddNode(baseNode.BaseNode):
         result = sum([plug.value for plug in self.inputs() if plug.value is not None])
         self.getPlug("output").value = result
 
+
 def getNode():
+    """General function that returns our node, used to get create our node via Ui etc
+    :return: Node instance
+    """
     return AddNode

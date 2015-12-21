@@ -27,7 +27,7 @@ class TestGraph(unittest.TestCase):
 
     def testGetNode(self):
         self.graph.addNode(self.testNode)
-        self.assertEquals(self.graph.getNode("testNode"), [self.testNode])
+        self.assertEquals(self.graph.getNode("testNode"), self.testNode)
 
     def testClearGraph(self):
         self.graph.addNode(self.testNode)

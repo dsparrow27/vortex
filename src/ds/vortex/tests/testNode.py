@@ -8,7 +8,7 @@ class TestBaseNode(unittest.TestCase):
         self.node = baseNode.BaseNode("testNode")
         self.plug = basePlug.BasePlug("testPlug", self.node)
 
-    def testAddInputPlug(self):
+    def testAddPlug(self):
         self.node.addPlug(self.plug)
         self.assertEquals(len(self.node.plugs), 1)
         self.node.deletePlug(self.plug)

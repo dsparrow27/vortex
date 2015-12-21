@@ -67,10 +67,12 @@ class Graph(object):
         :return: list(Node)
         """
         leafNodes = []
+
         for node in self._nodes.values():
-            if any(plug.connections for plug in node.inputs()):
-                continue
-            leafNodes.append(node)
+
+            if not any(plug.connections for plug in node.inputs()):
+                leafNodes.append(node)
+
         return leafNodes
 
     def compute(self):

@@ -1,4 +1,7 @@
 from collections import OrderedDict
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BaseNode(object):
@@ -50,7 +53,7 @@ class BaseNode(object):
         :return: list(Plug)
         """
         inputs = []
-        for name, plug in self._plugs.iteritems():
+        for plug in self._plugs.values():
             if plug.isInput():
                 inputs.append(plug)
         return inputs
@@ -60,7 +63,7 @@ class BaseNode(object):
         :return: list(Plug)
         """
         outputs = []
-        for name, plug in self._plugs.iteritems():
+        for plug in self._plugs.values():
             if plug.isOutput():
                 outputs.append(plug)
         return outputs
@@ -75,7 +78,7 @@ class BaseNode(object):
         """Intended to be overridden
         :return: None
         """
-        pass
+        logger.debug("Computing {}".format(self.name))
 
     def log(self, tabLevel=-1):
 

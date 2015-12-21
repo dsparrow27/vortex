@@ -1,4 +1,5 @@
 from functools import partial
+import os
 
 from ds.qt.qtAuto import QtGui, QtCore
 from ds.qt.widgets import mainWindow
@@ -6,9 +7,8 @@ from ds.qt.widgets import graphicView
 from ds.qt.widgets import node as qnode
 from ds.qt.widgets import graphicsScene
 from ds.qt.extendedWidgets import treeViewPlus
-import model
 from ds.vortex.core import graph
-import os
+import model
 
 
 class MainUi(mainWindow.MainWindow):
@@ -19,7 +19,6 @@ class MainUi(mainWindow.MainWindow):
                  parent=None, createMenuBar=True,
                  loadStyleSheet=True, showOnInitalize=True):
         super(MainUi, self).__init__(title, width, height, parent, createMenuBar, loadStyleSheet, showOnInitalize)
-        self.availableModules = []  # temp
         self.modulesDict = {}
         widget = QtGui.QWidget()
         self.setCentralWidget(widget)
@@ -39,7 +38,7 @@ class MainUi(mainWindow.MainWindow):
         # temp
         QtCore.QObject.connect(QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_Escape), self),
                                QtCore.SIGNAL('activated()'), self.close)
-        self.getNodeClasses("E:/tools/vortex\src\ds/vortex/nodes")
+        self.getNodeClasses("E:/tools/vortex\src\ds/vortex/nodes") # hard coded :(
         self.view.tabPressSignal.connect(self.showNodeList)
         # temp hardcode
 
@@ -63,8 +62,8 @@ class MainUi(mainWindow.MainWindow):
         self.view.addItem(winNode)
         self.outliner.reset()
 
-    def getNodeClasses(self, path, sourceDir="src"):
-        """
+    def getNodeClasses(self, path):
+        """Crude function :P
         recusive function
         searches all directories within the components folder gets all available modules
         :param path : string,
@@ -97,7 +96,6 @@ class MainUi(mainWindow.MainWindow):
                     "object": module.getNode(),
                     "fileName": cleanPath,
                     "modulePath": modulePath}
-        self.availableModules += toReturn
 
 
 class Outliner(QtGui.QWidget):

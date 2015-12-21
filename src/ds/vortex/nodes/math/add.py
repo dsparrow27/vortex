@@ -19,6 +19,7 @@ class AddNode(baseNode.BaseNode):
         self.addPlug(plugs.OutputPlug("output", self))
 
     def compute(self):
+        super(AddNode, self).compute()
         result = sum([plug.value for plug in self.inputs() if plug.value is not None])
         self.getPlug("output").value = result
 

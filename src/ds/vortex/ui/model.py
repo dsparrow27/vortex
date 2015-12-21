@@ -1,11 +1,4 @@
-"""
-@author : David Sparrow
-@Created on : Nov 1, 2015
-@email : dsparrow27@gmail.com
-@website : www.david-sparrow.com
-"""
-
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 
 
 class SceneGraphModel(QtCore.QAbstractItemModel):
@@ -99,7 +92,3 @@ class SceneGraphModel(QtCore.QAbstractItemModel):
             parentNode = parent.internalPointer()
             child = parentNode.plugs.values()[row]
         return self.createIndex(row, column, child)
-
-
-class Mapper():
-    pass

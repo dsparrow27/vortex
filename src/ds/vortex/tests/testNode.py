@@ -1,6 +1,6 @@
 import unittest
-from ds.vortex.core import baseNode, plug
-from ds.vortex.nodes.math import add
+from ds.vortexUi.core import baseNode, plug
+from ds.vortexUi.nodes.math import add
 
 
 class TestBaseNode(unittest.TestCase):

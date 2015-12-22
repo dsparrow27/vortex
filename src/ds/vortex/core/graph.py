@@ -29,6 +29,7 @@ class Graph(object):
         """
         if self.hasNode(node):
             return
+        node.name = self.generateUniqueName(node)
         self._nodes[node.name] = node
         return node
 
@@ -44,7 +45,7 @@ class Graph(object):
         :param node: node instance
         :return: bool
         """
-        return node.name in self._nodes
+        return node in self._nodes.values()
 
     def deleteNode(self, node):
         """Removes a node from the graph
@@ -58,6 +59,15 @@ class Graph(object):
         :return:
         """
         return self._nodes.get(nodeName)
+
+    def generateUniqueName(self, node):
+        increObj = IncrementObject(0, 2)
+        num = increObj.add()
+        name = node.name + num
+        while name in self._nodes:
+            name = node.name + increObj.add()
+
+        return name
 
     def clear(self):
         """Clears all the nodes from the graph
@@ -78,3 +88,25 @@ class Graph(object):
 
         return leafNodes
 
+
+class IncrementObject(object):
+    """A class to help with incrementing a number with a padding
+    """
+    def __init__(self, startNumber, padding):
+        """initilizes the seq number with start number and a padding value, use self.add() to add one number
+        :param startNumber: int, the number for the sequence to start at
+        :param padding: int, the number of numbers(zeros) to add in front of the seq number
+        """
+        self.seq = startNumber
+        self.padding = padding
+        self.currentValue = ""
+
+    def add(self):
+        """Increments the seq by and adds a padding value
+        :return: str
+        """
+        value = "%0{}d".format(self.padding)
+        value = value % self.seq
+        self.seq += 1
+        self.currentValue = value
+        return value

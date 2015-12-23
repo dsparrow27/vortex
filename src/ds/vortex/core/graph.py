@@ -21,16 +21,22 @@ class Graph(object):
         """
         return len(self._nodes)
 
-    def addNode(self, node):
+    def addNode(self, node, **kwargs):
         """Adds a Node instance to the graph this will also add the node to the graph class instance as a attribute
         which can be accessed by graph.node
         :param node: Node instance, the node to add
+        :kwargs: plugName=plugValue, the kwargs sets the input plugs value.
         :return Node instance
         """
         if self.hasNode(node):
             return
         node.name = self.generateUniqueName(node)
         self._nodes[node.name] = node
+        for plugName, plugValue in kwargs.iteritems():
+            plug = node.getPlug(plugName)
+            if plug.isInput():
+                plug.value = plugValue
+
         return node
 
     @property
@@ -61,6 +67,10 @@ class Graph(object):
         return self._nodes.get(nodeName)
 
     def generateUniqueName(self, node):
+        """Create a unique name for the node in the graph, on node creation a digit is appended , eg nodeName00, nodeName01
+        :param node: node Instance
+        :return: str
+        """
         increObj = IncrementObject(0, 2)
         num = increObj.add()
         name = node.name + num

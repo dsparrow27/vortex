@@ -15,14 +15,17 @@ class AddNode(baseNode.BaseNode):
         super(AddNode, self).__init__(name)
 
     def initialize(self):
+        self.addPlug(plugs.OutputPlug("output", self))
         self.addPlug(plugs.InputPlug("input1", self, 0))
         self.addPlug(plugs.InputPlug("input2", self, 0))
-        self.addPlug(plugs.OutputPlug("output", self))
 
     def compute(self):
         super(AddNode, self).compute()
         result = sum([plug.value for plug in self.inputs() if plug.value is not None])
-        self.getPlug("output").value = result
+        output = self.getPlug("output")
+        if output is not None:
+            output.value = result
+
 
 
 def getNode():

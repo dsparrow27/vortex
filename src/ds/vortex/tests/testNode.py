@@ -30,11 +30,11 @@ class TestAddNode(unittest.TestCase):
         inputPlug2 = self.node.getPlug("input2")
         inputPlug1.value = 10
         inputPlug2.value = 10
-        self.node.compute()
+        # self.node.compute()
         self.assertEquals(self.node.getPlug("output").value, 20)
         inputPlug1.value = 6158449
         inputPlug2.value = 8568
-        self.node.compute()
+        # self.node.compute()
         self.assertEquals(self.node.getPlug("output").value, 6167017)
 
 if __name__ == "__main__":

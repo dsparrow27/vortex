@@ -1,5 +1,5 @@
 import unittest
-from ds.vortexUi.core import plug as plugs
+from ds.vortex.core import plug as plugs
 
 
 class TestPlug(unittest.TestCase):

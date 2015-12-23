@@ -1,7 +1,7 @@
 import unittest
-from ds.vortexUi.core import baseNode
-from ds.vortexUi.core import plug as plugs
-from ds.vortexUi.core import graph
+from ds.vortex.core import baseNode
+from ds.vortex.core import plug as plugs
+from ds.vortex.core import graph
 
 
 class TestGraph(unittest.TestCase):
@@ -27,7 +27,7 @@ class TestGraph(unittest.TestCase):
 
     def testGetNode(self):
         self.graph.addNode(self.testNode)
-        self.assertEquals(self.graph.getNode("testNode"), self.testNode)
+        self.assertEquals(self.graph.getNode("testNode00"), self.testNode)
 
     def testClearGraph(self):
         self.graph.addNode(self.testNode)

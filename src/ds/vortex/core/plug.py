@@ -79,7 +79,10 @@ class BasePlug(object):
         self._connections.append(plug)
         if self not in plug.connections:
             plug.connect(self)
-        self.node.setDownStreamDirty()
+        try:
+            self.node.setDownStreamDirty()
+        except AttributeError:
+            logger.debug("plug has no node parent::{}".format(self.name))
         self.dirty = True
 
     def isConnected(self):
@@ -146,6 +149,7 @@ class InputPlug(BasePlug):
         # inputs can only have a single connection
         self._connections = []
         super(InputPlug, self).connect(plug)
+
 
 class OutputPlug(BasePlug):
     def __init__(self, name, node=None, value=None):

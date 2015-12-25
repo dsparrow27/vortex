@@ -1,7 +1,7 @@
 import logging
 from collections import OrderedDict
 
-logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Graph(object):
@@ -36,7 +36,6 @@ class Graph(object):
             plug = node.getPlug(plugName)
             if plug.isInput():
                 plug.value = plugValue
-
         return node
 
     @property
@@ -98,10 +97,26 @@ class Graph(object):
 
         return leafNodes
 
+    def requestEvaluate(self, outputPlug):
+        node = outputPlug.node
+        for plug in node.plugs.values():
+            if plug.isInput():
+                if not plug.isConnected():
+                    plug.dirty = False
+                    continue
+                connectedPlug = plug.connections[0]
+                logger.debug("requesting plug ::{0}, nodeName::{1}".format(connectedPlug.name, connectedPlug.node.name))
+                self.requestEvaluate(connectedPlug)
+                plug.value = connectedPlug.value
+                plug.dirty = False
+        node.compute()
+        logger.debug("computed output is::{0}, nodeName::{1}, plug::{2}".format(outputPlug.value, node.name, outputPlug.name))
+
 
 class IncrementObject(object):
     """A class to help with incrementing a number with a padding
     """
+
     def __init__(self, startNumber, padding):
         """initilizes the seq number with start number and a padding value, use self.add() to add one number
         :param startNumber: int, the number for the sequence to start at

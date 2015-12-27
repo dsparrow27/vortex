@@ -98,8 +98,11 @@ class BasePlug(object):
         :param plug: plug instance
         :return: None
         """
-        del self._connections[self._connections.index(plug)]
-        del plug.connections[plug.connections.index(self)]
+        try:
+            del self._connections[self._connections.index(plug)]
+            del plug.connections[plug.connections.index(self)]
+        except ValueError:
+            logger.debug("Could not find plug in connections")
 
     def log(self, tabLevel=-1):
 

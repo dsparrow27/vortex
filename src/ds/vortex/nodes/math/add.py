@@ -15,9 +15,9 @@ class AddNode(baseNode.BaseNode):
         super(AddNode, self).__init__(name)
 
     def initialize(self):
-        self.addPlug(plugs.OutputPlug("output", self))
-        self.addPlug(plugs.InputPlug("input1", self, 0))
-        self.addPlug(plugs.InputPlug("input2", self, 0))
+        self.addPlug(plugs.OutputPlug("output", self), clean=True)
+        self.addPlug(plugs.InputPlug("input1", self, 0), clean=True)
+        self.addPlug(plugs.InputPlug("input2", self, 0), clean=True)
 
     def compute(self):
         super(AddNode, self).compute()
@@ -25,7 +25,7 @@ class AddNode(baseNode.BaseNode):
         output = self.getPlug("output")
         if output is not None:
             output.value = result
-
+        output.dirty = False
 
 
 def getNode():

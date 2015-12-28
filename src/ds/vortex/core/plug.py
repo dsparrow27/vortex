@@ -19,7 +19,7 @@ class BasePlug(object):
         self._node = node
         self._io = "input"
         self._connections = []
-        self.dirty = False
+        self._dirty = False  # false is clean
         self._value = value
 
     def __repr__(self):
@@ -29,12 +29,21 @@ class BasePlug(object):
         return len(self._connections)
 
     @property
+    def dirty(self):
+        return self._dirty
+
+    @dirty.setter
+    def dirty(self, value):
+        self._dirty = value
+
+    @property
     def value(self):
-        return self._value
+        return self._dirty
 
     @value.setter
     def value(self, value):
         self._value = value
+        self.dirty = True
 
     @property
     def node(self):
@@ -78,7 +87,11 @@ class BasePlug(object):
         self._connections.append(plug)
         if self not in plug.connections:
             plug.connect(self)
-        self.dirty = False
+        try:
+            self.node.setDownStreamDirty()
+        except AttributeError:
+            logger.debug("plug has no node parent::{}".format(self.name))
+        self.dirty = True
 
     def isConnected(self):
         """Returns True if self is connected to another plug
@@ -93,8 +106,11 @@ class BasePlug(object):
         :param plug: plug instance
         :return: None
         """
-        del self._connections[self._connections.index(plug)]
-        del plug.connections[plug.connections.index(self)]
+        try:
+            del self._connections[self._connections.index(plug)]
+            del plug.connections[plug.connections.index(self)]
+        except ValueError:
+            logger.debug("Could not find plug in connections")
 
     def log(self, tabLevel=-1):
 
@@ -137,9 +153,8 @@ class InputPlug(BasePlug):
     def value(self, value):
         # pass the value to all connected plugs if it is connected
         self._value = value
-        if not self.node:
-            return
-        self.node.compute()
+        self.dirty = True
+        self._node.setDownStreamDirty()
 
     def connect(self, plug):
         # inputs can only have a single connection
@@ -157,20 +172,3 @@ class OutputPlug(BasePlug):
         """
         super(OutputPlug, self).__init__(name, node, value)
         self._io = "output"
-
-    def connect(self, plug):
-        super(OutputPlug, self).connect(plug)
-        # set the input plug value to pass the value on
-        plug.value = self.value
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        # pass the value to all connected plugs if it is connected
-        self._value = value
-        if self.isConnected():
-            for plug in self._connections:
-                plug.value = value

@@ -36,13 +36,15 @@ class BaseNode(object):
         """
         return self._plugs
 
-    def addPlug(self, plug, value=None):
+    def addPlug(self, plug, value=None, clean=False):
         """Adds a plug to self
         :param plug: Plug instance to add
         :param value: any type, This argument get passed to the plug value attribute
         """
         self._plugs[plug.name] = plug
         plug.value = value
+        if clean:
+            plug.dirty = False
 
     def getPlug(self, plugName):
         """Returns the plug based on the name
@@ -56,6 +58,20 @@ class BaseNode(object):
         :param plug:
         """
         del self._plugs[plug.name]
+
+    def setDownStreamDirty(self):
+        visitedNodes = []
+        for plug in self._plugs.values():
+            if plug.isOutput():
+                if plug.isConnected():
+                    for inputPlug in plug.connections:
+                        inputPlug.dirty = True
+                        node = inputPlug.node
+                        if node not in visitedNodes:
+                            node.setDownStreamDirty()
+                            visitedNodes.append(node)
+                            continue
+                plug.dirty = True
 
     def inputs(self):
         """Finds and returns all the inputs for self

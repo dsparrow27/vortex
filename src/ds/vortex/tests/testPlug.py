@@ -27,4 +27,7 @@ class TestPlug(unittest.TestCase):
         self.assertEquals(len(self.plug), 0)
 
 if __name__ == "__main__":
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.setLevel(level=logging.INFO)
     unittest.main(verbosity=2)

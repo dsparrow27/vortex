@@ -19,7 +19,7 @@ class BasePlug(object):
         self._node = node
         self._io = "input"
         self._connections = []
-        self.dirty = False  # false is clean
+        self._dirty = False  # false is clean
         self._value = value
 
     def __repr__(self):
@@ -29,8 +29,16 @@ class BasePlug(object):
         return len(self._connections)
 
     @property
+    def dirty(self):
+        return self._dirty
+
+    @dirty.setter
+    def dirty(self, value):
+        self._dirty = value
+
+    @property
     def value(self):
-        return self._value
+        return self._dirty
 
     @value.setter
     def value(self, value):

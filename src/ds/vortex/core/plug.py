@@ -38,7 +38,7 @@ class BasePlug(object):
 
     @property
     def value(self):
-        return self._dirty
+        return self._value
 
     @value.setter
     def value(self, value):
@@ -142,7 +142,7 @@ class InputPlug(BasePlug):
         :param value: anything, data storage that this plug is equal to eg. float value, gets used by the compute method
         in the node
         """
-        super(InputPlug, self).__init__(name, node, value)
+        BasePlug.__init__(self, name, node, value)
         self._io = "input"
 
     @property
@@ -170,5 +170,5 @@ class OutputPlug(BasePlug):
         :param value: anything, data storage that this plug is equal to eg. float value, gets used by the compute method
         in the node
         """
-        super(OutputPlug, self).__init__(name, node, value)
+        BasePlug.__init__(self, name, node, value)
         self._io = "output"

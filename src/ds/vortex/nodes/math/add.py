@@ -12,20 +12,22 @@ class AddNode(baseNode.BaseNode):
         """
         :param name: str, the name of the node
         """
-        super(AddNode, self).__init__(name)
+        baseNode.BaseNode.__init__(self, name)
 
     def initialize(self):
+        baseNode.BaseNode.initialize(self)
         self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("input1", self, 0), clean=True)
-        self.addPlug(plugs.InputPlug("input2", self, 0), clean=True)
+        self.addPlug(plugs.InputPlug("input1", self), 0, clean=True)
+        self.addPlug(plugs.InputPlug("input2", self), 0, clean=True)
 
     def compute(self):
-        super(AddNode, self).compute()
+        baseNode.BaseNode.compute(self)
         result = sum([plug.value for plug in self.inputs() if plug.value is not None])
         output = self.getPlug("output")
         if output is not None:
             output.value = result
         output.dirty = False
+        return result
 
 
 def getNode():

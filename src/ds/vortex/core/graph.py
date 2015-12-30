@@ -100,7 +100,7 @@ class Graph(object):
     def requestEvaluate(self, outputPlug):
         node = outputPlug.node
         for plug in node.plugs.values():
-            if plug.isInput():
+            if plug.isInput() and plug.dirty:
                 if not plug.isConnected():
                     plug.dirty = False
                     continue

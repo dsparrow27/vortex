@@ -2,7 +2,7 @@ from ds.vortex.core import baseNode
 from ds.vortex.core import plug as plugs
 
 
-class ArcCosNode(baseNode.BaseNode):
+class EqualToNode(baseNode.BaseNode):
     def __init__(self, name):
         """
         :param name: str, the name of the node
@@ -28,4 +28,4 @@ def getNode():
     """General function that returns our node, used to get create our node via Ui etc
     :return: Node instance
     """
-    return ArcCosNode
+    return EqualToNode

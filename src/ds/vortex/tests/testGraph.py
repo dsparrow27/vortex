@@ -1,8 +1,9 @@
 import unittest
+
 from ds.vortex.core import baseNode
-from ds.vortex.core import plug as plugs
 from ds.vortex.core import graph
-from ds.vortex.nodes.math import add
+from ds.vortex.core import plug as plugs
+from ds.vortex.nodes.math.basic import add
 
 
 class TestGraph(unittest.TestCase):

@@ -1,6 +1,10 @@
 import unittest
+
 from ds.vortex.core import baseNode, plug
-from ds.vortex.nodes.math import add, multiply
+from ds.vortex.nodes.math.basic import multiply
+from ds.vortex.nodes.math.basic import add
+from ds.vortex.nodes.math.basic import divide
+from ds.vortex.nodes.math.basic import invert
 
 
 class TestBaseNode(unittest.TestCase):
@@ -53,6 +57,47 @@ class TestMultipleNode(unittest.TestCase):
         inputPlug2.value = 8568
         self.node.compute()
         self.assertEquals(self.node.getPlug("output").value, 52765591032)
+        inputPlug1.value = 1654138763
+        inputPlug2.value = 0
+        self.node.compute()
+        self.assertEquals(self.node.getPlug("output").value, 0)
+
+
+class TestDivideNode(unittest.TestCase):
+    def setUp(self):
+        self.node = divide.DivideNode("divide")
+
+    def testCompute(self):
+        inputPlug1 = self.node.getPlug("input1")
+        inputPlug2 = self.node.getPlug("input2")
+        inputPlug1.value = 10
+        inputPlug2.value = 10
+        self.node.compute()
+        self.assertEquals(self.node.getPlug("output").value, 1)
+        inputPlug1.value = 855423
+        inputPlug2.value = 8766663
+        self.node.compute()
+        self.assertEquals(self.node.getPlug("output").value, 0)
+        inputPlug1.value = 1654138763
+        inputPlug2.value = 0
+        self.node.compute()
+        self.assertEquals(self.node.getPlug("output").value, 0)
+
+class TestInvertNode(unittest.TestCase):
+    def setUp(self):
+        self.node = invert.InvertNode("divide")
+
+    def testCompute(self):
+        inputPlug1 = self.node.getPlug("input1")
+        inputPlug2 = self.node.getPlug("input2")
+        inputPlug1.value = 10
+        inputPlug2.value = 10
+        self.node.compute()
+        self.assertEquals(self.node.getPlug("output").value, 1)
+        inputPlug1.value = 855423
+        inputPlug2.value = 8766663
+        self.node.compute()
+        self.assertEquals(self.node.getPlug("output").value, 0)
         inputPlug1.value = 1654138763
         inputPlug2.value = 0
         self.node.compute()

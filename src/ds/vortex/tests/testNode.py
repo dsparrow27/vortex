@@ -1,5 +1,4 @@
 import unittest
-
 from ds.vortex.core import baseNode, plug
 from ds.vortex.nodes.math.basic import multiply
 from ds.vortex.nodes.math.basic import add
@@ -30,8 +29,8 @@ class TestAddNode(unittest.TestCase):
         self.node = add.AddNode("add")
 
     def testCompute(self):
-        inputPlug1 = self.node.getPlug("input1")
-        inputPlug2 = self.node.getPlug("input2")
+        inputPlug1 = self.node.getPlug("value1")
+        inputPlug2 = self.node.getPlug("value2")
         inputPlug1.value = 10
         inputPlug2.value = 10
         self.node.compute()
@@ -47,8 +46,8 @@ class TestMultipleNode(unittest.TestCase):
         self.node = multiply.MultiplyNode("multiply")
 
     def testCompute(self):
-        inputPlug1 = self.node.getPlug("input1")
-        inputPlug2 = self.node.getPlug("input2")
+        inputPlug1 = self.node.getPlug("value1")
+        inputPlug2 = self.node.getPlug("value2")
         inputPlug1.value = 10
         inputPlug2.value = 10
         self.node.compute()
@@ -68,8 +67,8 @@ class TestDivideNode(unittest.TestCase):
         self.node = divide.DivideNode("divide")
 
     def testCompute(self):
-        inputPlug1 = self.node.getPlug("input1")
-        inputPlug2 = self.node.getPlug("input2")
+        inputPlug1 = self.node.getPlug("value1")
+        inputPlug2 = self.node.getPlug("value2")
         inputPlug1.value = 10
         inputPlug2.value = 10
         self.node.compute()
@@ -82,29 +81,28 @@ class TestDivideNode(unittest.TestCase):
         inputPlug2.value = 0
         self.node.compute()
         self.assertEquals(self.node.getPlug("output").value, 0)
+
 
 class TestInvertNode(unittest.TestCase):
     def setUp(self):
         self.node = invert.InvertNode("divide")
 
     def testCompute(self):
-        inputPlug1 = self.node.getPlug("input1")
-        inputPlug2 = self.node.getPlug("input2")
+        inputPlug1 = self.node.getPlug("value")
         inputPlug1.value = 10
-        inputPlug2.value = 10
         self.node.compute()
-        self.assertEquals(self.node.getPlug("output").value, 1)
+        self.assertEquals(self.node.getPlug("output").value, -10)
         inputPlug1.value = 855423
-        inputPlug2.value = 8766663
         self.node.compute()
-        self.assertEquals(self.node.getPlug("output").value, 0)
-        inputPlug1.value = 1654138763
-        inputPlug2.value = 0
+        self.assertEquals(self.node.getPlug("output").value, -855423)
+        inputPlug1.value = -855423
         self.node.compute()
-        self.assertEquals(self.node.getPlug("output").value, 0)
+        self.assertEquals(self.node.getPlug("output").value, 855423)
+
 
 if __name__ == "__main__":
     import logging
+
     logger = logging.getLogger("baseNode")
     logger.setLevel(level=logging.INFO)
     unittest.main(verbosity=2)

@@ -16,7 +16,7 @@ class ScalarNode(baseNode.BaseNode):
 
     def compute(self):
         baseNode.BaseNode.compute(self)
-        result = self.getPlug("value").value
+        result = float(self.getPlug("value").value)
         if result is None:
             return
         output = self.getPlug("output")

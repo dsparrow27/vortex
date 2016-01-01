@@ -1,8 +1,10 @@
+import math
 from ds.vortex.core import baseNode
 from ds.vortex.core import plug as plugs
 
 
-class StringNode(baseNode.BaseNode):
+class ModuloNode(baseNode.BaseNode):
+
     def __init__(self, name):
         """
         :param name: str, the name of the node
@@ -12,13 +14,12 @@ class StringNode(baseNode.BaseNode):
     def initialize(self):
         baseNode.BaseNode.initialize(self)
         self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value", self), "", clean=True)
+        self.addPlug(plugs.InputPlug("value", self), 0, clean=True)
+        self.addPlug(plugs.InputPlug("moduloBy", self), 0, clean=True)
 
     def compute(self):
         baseNode.BaseNode.compute(self)
-        result = str(self.getPlug("value").value)
-        if result is None:
-            return
+        result = self.getPlug("value").value % self.getPlug("moduleBy")
         output = self.getPlug("output")
         if output is not None:
             output.value = result
@@ -30,4 +31,4 @@ def getNode():
     """General function that returns our node, used to get create our node via Ui etc
     :return: Node instance
     """
-    return StringNode
+    return ModuloNode

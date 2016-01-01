@@ -1,4 +1,3 @@
-import math
 from ds.vortex.core import baseNode
 from ds.vortex.core import plug as plugs
 
@@ -19,7 +18,7 @@ class ModuloNode(baseNode.BaseNode):
 
     def compute(self):
         baseNode.BaseNode.compute(self)
-        result = self.getPlug("value").value % self.getPlug("moduleBy")
+        result = self.getPlug("value").value % self.getPlug("moduloBy").value
         output = self.getPlug("output")
         if output is not None:
             output.value = result

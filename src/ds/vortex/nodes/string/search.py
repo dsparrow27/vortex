@@ -1,8 +1,11 @@
+import re
 from ds.vortex.core import baseNode
 from ds.vortex.core import plug as plugs
 
 
-class BoolNode(baseNode.BaseNode):
+class SearchStringNode(baseNode.BaseNode):
+    """Returns a list of strings that have the search string in it.
+    """
     def __init__(self, name):
         """
         :param name: str, the name of the node
@@ -12,11 +15,13 @@ class BoolNode(baseNode.BaseNode):
     def initialize(self):
         baseNode.BaseNode.initialize(self)
         self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value", self), 1, clean=True)
+        self.addPlug(plugs.InputPlug("value", self), [], clean=True)
+        self.addPlug(plugs.InputPlug("searchValue", self), "", clean=True)
 
     def compute(self):
         baseNode.BaseNode.compute(self)
-        result = bool(self.getPlug("value").value)
+        result = [char for char in [self.getPlug("value").value] if re.search(self.getPlug("searchValue"), char)]
+
         if result is None:
             return
         output = self.getPlug("output")
@@ -30,5 +35,4 @@ def getNode():
     """General function that returns our node, used to get create our node via Ui etc
     :return: Node instance
     """
-    return BoolNode
-
+    return SearchStringNode

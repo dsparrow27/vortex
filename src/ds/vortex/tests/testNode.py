@@ -92,9 +92,6 @@ class TestInvertNode(unittest.TestCase):
         inputPlug1.value = 10
         self.node.compute()
         self.assertEquals(self.node.getPlug("output").value, -10)
-        inputPlug1.value = 855423
-        self.node.compute()
-        self.assertEquals(self.node.getPlug("output").value, -855423)
         inputPlug1.value = -855423
         self.node.compute()
         self.assertEquals(self.node.getPlug("output").value, 855423)

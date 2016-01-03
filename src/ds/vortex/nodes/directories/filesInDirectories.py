@@ -21,7 +21,7 @@ class FilesInDirectoriesNode(baseNode.BaseNode):
         for directory in self.getPlug("directories").value:
             if not os.listdir(directory):
                 continue
-            result.append([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))])
+            result.extend([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))])
 
         if not result:
             return

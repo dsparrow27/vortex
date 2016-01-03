@@ -4,9 +4,7 @@ logger = logging.getLogger(__name__)
 
 
 class BasePlug(object):
-    """Base Plug class , inputs and outpt plug is derived from this class, when connecting other plug instances,
-    you should call both plug.connect individually, eg inputPlug.connect(outputPlug)
-                                                    outputPlug.connect(inputPlug_
+    """Base Plug class , inputs and output plug is derived from this class
     """
 
     def __init__(self, name, node=None, value=None):
@@ -26,22 +24,40 @@ class BasePlug(object):
         return "{}{}".format(self.__class__, self.__dict__)
 
     def __len__(self):
+        """returns the length of the connections
+        :return: int, the amount of connections
+        """
         return len(self._connections)
 
     @property
     def dirty(self):
+        """gets the dirty state of the plug
+        :return: bool
+        """
         return self._dirty
 
     @dirty.setter
     def dirty(self, value):
+        """sets the dirty state of the plug
+        :param value: bool, the dirty state(False==clean, True==dirty)
+        :return: None
+        """
         self._dirty = value
 
     @property
     def value(self):
+        """Return the value of the plug, this can have any data type.
+        :return: Type(), returns whatever value for the plug(used in compute function)
+        """
         return self._value
 
     @value.setter
     def value(self, value):
+        """sets the value of the plug, can have any data type and any value eg. custom python object, dict etc.
+        The function will also set the plug to dirty
+        :param value: the value to give the plug
+        :return: None
+        """
         self._value = value
         self.dirty = True
 
@@ -113,7 +129,10 @@ class BasePlug(object):
             logger.debug("Could not find plug in connections")
 
     def log(self, tabLevel=-1):
-
+        """
+        :param tabLevel: int, the tab size
+        :return: str, the logged string that can be used to print
+        """
         output = ""
         tabLevel += 1
 
@@ -151,12 +170,20 @@ class InputPlug(BasePlug):
 
     @value.setter
     def value(self, value):
+        """sets the value of the plug and sets the plug dirty, calls on the parent node setDownStreamDirty()
+        :param value: the value to set
+        """
         # pass the value to all connected plugs if it is connected
         self._value = value
         self.dirty = True
         self._node.setDownStreamDirty()
 
     def connect(self, plug):
+        """creates a connection between to plugs, a input can only have one input so current connections is cleared
+        before creating the new connection
+        :param plug:
+        :return:
+        """
         # inputs can only have a single connection
         self._connections = []
         super(InputPlug, self).connect(plug)

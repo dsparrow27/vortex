@@ -5,9 +5,12 @@ logger = logging.getLogger(__name__)
 
 
 class Graph(object):
+    """This graph class stores the nodes and will evaluate the graph on request, to request a compute you will first need
+    the output plug instance and then call Graph.requestEvaluate(outputPlug)
+    """
     def __init__(self, name=""):
         """
-        :param name: str, the name of the graph to set
+        :param name: str, the name of the graph
         """
         self._name = name
         self._nodes = OrderedDict()
@@ -17,7 +20,7 @@ class Graph(object):
 
     def __len__(self):
         """Returns the length of the nodes in the graph
-        :return:
+        :return: int, the length of nodes in this graph
         """
         return len(self._nodes)
 
@@ -25,7 +28,7 @@ class Graph(object):
         """Adds a Node instance to the graph this will also add the node to the graph class instance as a attribute
         which can be accessed by graph.node
         :param node: Node instance, the node to add
-        :kwargs: plugName=plugValue, the kwargs sets the input plugs value.
+        :param kwargs: plugName=plugValue, the kwargs sets the input plugs value.
         :return Node instance
         """
         if self.hasNode(node):
@@ -41,7 +44,7 @@ class Graph(object):
     @property
     def nodes(self):
         """Returns all the nodes in the graph
-        :return:
+        :return: OrderedDict
         """
         return self._nodes
 
@@ -54,21 +57,21 @@ class Graph(object):
 
     def deleteNode(self, node):
         """Removes a node from the graph
-        :param node:
+        :param node: the node instance to delete
         """
         del self._nodes[node.name]
 
     def getNode(self, nodeName):
         """Returns a node based on the name or empty list
-        :param nodeName:
-        :return:
+        :param nodeName: the name of the node to get
+        :return:Node instance
         """
         return self._nodes.get(nodeName)
 
     def generateUniqueName(self, node):
         """Create a unique name for the node in the graph, on node creation a digit is appended , eg nodeName00, nodeName01
         :param node: node Instance
-        :return: str
+        :return: str, returns the new node name as a string
         """
         increObj = IncrementObject(0, 2)
         num = increObj.add()
@@ -98,10 +101,15 @@ class Graph(object):
         return leafNodes
 
     def requestEvaluate(self, outputPlug):
+        """Computes the appropriate nodes for the output plug, will evaluate all dirty plugs/nodes that need to be done
+        for this plug
+        :param outputPlug: plug instance to compute
+        """
         node = outputPlug.node
-        for plug in node.plugs.values():
-            if plug.isInput() and plug.dirty:
+        for plug in node.inputs():
+            if plug.dirty:
                 if not plug.isConnected():
+                    # mark clean
                     plug.dirty = False
                     continue
                 connectedPlug = plug.connections[0]
@@ -109,8 +117,10 @@ class Graph(object):
                 self.requestEvaluate(connectedPlug)
                 plug.value = connectedPlug.value
                 plug.dirty = False
+
         node.compute()
-        logger.debug("computed output is::{0}, nodeName::{1}, plug::{2}".format(outputPlug.value, node.name, outputPlug.name))
+        logger.debug("computed output is::{0}, nodeName::{1}, plug::{2}".format(outputPlug.value, node.name,
+                                                                                outputPlug.name))
 
 
 class IncrementObject(object):
@@ -118,7 +128,7 @@ class IncrementObject(object):
     """
 
     def __init__(self, startNumber, padding):
-        """initilizes the seq number with start number and a padding value, use self.add() to add one number
+        """initializes the seq number with start number and a padding value, use self.add() to add one number
         :param startNumber: int, the number for the sequence to start at
         :param padding: int, the number of numbers(zeros) to add in front of the seq number
         """

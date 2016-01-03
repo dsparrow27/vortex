@@ -18,12 +18,13 @@ class SplitStringNode(baseNode.BaseNode):
 
     def compute(self):
         baseNode.BaseNode.compute(self)
-        result = str(self.getPlug("value").value).split(self.getPlug("delimiter"))
+        result = str(self.getPlug("value").value).split(self.getPlug("delimiter").value)
         returnIndex = self.getPlug("returnIndex").value
-        if returnIndex is not None:
+
+        if returnIndex:
+            returnIndex = int(returnIndex)
             result = result[returnIndex]
-        if result is None:
-            return
+
         output = self.getPlug("output")
         if output is not None:
             output.value = result

@@ -5,6 +5,8 @@ logger = logging.getLogger(__name__)
 
 
 class BaseNode(object):
+    """Core node class that stores the all the plugs, initialize and compute methods must be overridden in custom nodes
+    """
     def __init__(self, name):
         """
         :param name: str, the name of the node
@@ -25,14 +27,14 @@ class BaseNode(object):
 
     def __len__(self):
         """Return the length of the plugs for this node
-        :return: int
+        :return: int, the length of the plugs
         """
         return len(self._plugs)
 
     @property
     def plugs(self):
         """Returns the the plugs for this node
-        :return: set(Plug)
+        :return: dict(name:plug)
         """
         return self._plugs
 
@@ -40,6 +42,7 @@ class BaseNode(object):
         """Adds a plug to self
         :param plug: Plug instance to add
         :param value: any type, This argument get passed to the plug value attribute
+        :param clean: sets the new plug dirty state, this gets set after the value is set
         """
         self._plugs[plug.name] = plug
         plug.value = value
@@ -55,23 +58,27 @@ class BaseNode(object):
 
     def deletePlug(self, plug):
         """Removes the plug from the node
-        :param plug:
+        :param plug: the plug instance to delete
         """
         del self._plugs[plug.name]
 
     def setDownStreamDirty(self):
+        """Sets all the output plugs on the node to dirty , if the plug is connected then walk the connected plugs
+        setting the dirty flag on each plug as we go
+        """
         visitedNodes = []
-        for plug in self._plugs.values():
-            if plug.isOutput():
-                if plug.isConnected():
-                    for inputPlug in plug.connections:
-                        inputPlug.dirty = True
-                        node = inputPlug.node
-                        if node not in visitedNodes:
-                            node.setDownStreamDirty()
-                            visitedNodes.append(node)
-                            continue
-                plug.dirty = True
+        for plug in self.outputs():
+            # walk if connected
+            if plug.isConnected():
+                for inputPlug in plug.connections:
+                    inputPlug.dirty = True
+                    node = inputPlug.node
+                    # if we haven't visited this node before then call setDownStreamDirty on it
+                    if node not in visitedNodes:
+                        node.setDownStreamDirty()
+                        visitedNodes.append(node)
+                        continue
+            plug.dirty = True
 
     def inputs(self):
         """Finds and returns all the inputs for self

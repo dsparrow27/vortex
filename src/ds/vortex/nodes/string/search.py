@@ -20,7 +20,7 @@ class SearchStringNode(baseNode.BaseNode):
 
     def compute(self):
         baseNode.BaseNode.compute(self)
-        result = [char for char in [self.getPlug("value").value] if re.search(self.getPlug("searchValue"), char)]
+        result = [char for char in [self.getPlug("value").value] if re.search(self.getPlug("searchValue").value, char)]
 
         if result is None:
             return

@@ -19,7 +19,8 @@ class FilesInDirectoriesNode(baseNode.BaseNode):
         baseNode.BaseNode.compute(self)
         result = []
         for directory in self.getPlug("directories").value:
-            if not os.listdir(directory):
+            directory = os.path.normpath(directory)
+            if not os.path.exists(directory):
                 continue
             result.extend([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))])
 

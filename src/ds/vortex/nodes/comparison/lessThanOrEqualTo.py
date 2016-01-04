@@ -12,7 +12,8 @@ class LessThanOrEqualToNode(baseNode.BaseNode):
     def initialize(self):
         baseNode.BaseNode.initialize(self)
         self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value", self), 0, clean=True)
+        self.addPlug(plugs.InputPlug("value1", self), 0, clean=True)
+        self.addPlug(plugs.InputPlug("value2", self), 0, clean=True)
 
     def compute(self):
         baseNode.BaseNode.compute(self)

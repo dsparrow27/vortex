@@ -1,8 +1,13 @@
+import os
+import shutil
+
 from ds.vortex.core import baseNode
 from ds.vortex.core import plug as plugs
 
 
-class ArrayIndexNode(baseNode.BaseNode):
+class CopyFilesToNode(baseNode.BaseNode):
+    """Copy a list of files to a directory and returns the new file paths
+    """
     def __init__(self, name):
         """
         :param name: str, the name of the node
@@ -12,16 +17,16 @@ class ArrayIndexNode(baseNode.BaseNode):
     def initialize(self):
         baseNode.BaseNode.initialize(self)
         self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("array", self), [], clean=True)
-        self.addPlug(plugs.InputPlug("value", self), 0, clean=True)
+        self.addPlug(plugs.InputPlug("sourceFiles", self), [], clean=True)
+        self.addPlug(plugs.InputPlug("destinationDirectory", self), "", clean=True)
 
     def compute(self):
         baseNode.BaseNode.compute(self)
-        value = self.getPlug("value").value
-        array = self.getPlug("array").value
-        if value in array:
-            result = array.index(value)
-        else:
+        sources = self.getPlug("sourceFiles").value
+        destination = self.getPlug("destinationDirectory").value
+        [shutil.copy2(src, destination) for src in sources]
+        result = [os.path.join(destination, os.path.basename(newFile)) for newFile in sources]
+        if not result:
             return
         output = self.getPlug("output")
         if output is not None:
@@ -34,4 +39,4 @@ def getNode():
     """General function that returns our node, used to get create our node via Ui etc
     :return: Node instance
     """
-    return ArrayIndexNode
+    return CopyFilesToNode

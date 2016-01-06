@@ -8,12 +8,13 @@ class Graph(object):
     """This graph class stores the nodes and will evaluate the graph on request, to request a compute you will first need
     the output plug instance and then call Graph.requestEvaluate(outputPlug)
     """
-    def __init__(self, name=""):
+    def __init__(self, name="", graph=None):
         """
         :param name: str, the name of the graph
         """
         self._name = name
         self._nodes = OrderedDict()
+        self.graph = Graph
 
     def __repr__(self):
         return "{}{}".format(self.__class__.__name__, self.__dict__)
@@ -105,6 +106,9 @@ class Graph(object):
         for this plug
         :param outputPlug: plug instance to compute
         """
+        if not outputPlug.dirty:
+            return outputPlug.value
+
         node = outputPlug.node
         for plug in node.inputs():
             if plug.dirty:
@@ -114,13 +118,17 @@ class Graph(object):
                     continue
                 connectedPlug = plug.connections[0]
                 logger.debug("requesting plug ::{0}, nodeName::{1}".format(connectedPlug.name, connectedPlug.node.name))
-                self.requestEvaluate(connectedPlug)
+                if connectedPlug.dirty:
+                    self.requestEvaluate(connectedPlug)
                 plug.value = connectedPlug.value
                 plug.dirty = False
 
         node.compute()
         logger.debug("computed output is::{0}, nodeName::{1}, plug::{2}".format(outputPlug.value, node.name,
                                                                                 outputPlug.name))
+
+    def saveGraph(self):
+        serializedGraph = {}
 
 
 class IncrementObject(object):

@@ -6,7 +6,6 @@ logger = logging.getLogger(__name__)
 class BasePlug(object):
     """Base Plug class , inputs and output plug is derived from this class
     """
-
     def __init__(self, name, node=None, value=None):
         """
         :param name: str, the name for the plug
@@ -19,6 +18,7 @@ class BasePlug(object):
         self._connections = []
         self._dirty = False  # false is clean
         self._value = value
+        self.attributeAffect = None
 
     def __repr__(self):
         return "{}{}".format(self.__class__, self.__dict__)
@@ -103,11 +103,13 @@ class BasePlug(object):
         self._connections.append(plug)
         if self not in plug.connections:
             plug.connect(self)
-        try:
-            self.node.setDownStreamDirty()
-        except AttributeError:
-            logger.debug("plug has no node parent::{}".format(self.name))
-        self.dirty = True
+        if self.isInput():
+            try:
+                self.node.setDownStreamDirty()
+            except AttributeError:
+                logger.debug("plug has no node parent::{}".format(self.name))
+
+            self.dirty = True
 
     def isConnected(self):
         """Returns True if self is connected to another plug

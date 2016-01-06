@@ -22,7 +22,8 @@ class TestBaseNode(unittest.TestCase):
         self.assertEquals(self.node.getPlug("testPlug"), self.plug)
         self.node.deletePlug(self.plug)
         self.assertEquals(self.node.getPlug("testPlug"), None)
-
+    def testSerialize(self):
+        pass
 
 class TestAddNode(unittest.TestCase):
     def setUp(self):

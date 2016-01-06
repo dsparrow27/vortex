@@ -1,5 +1,4 @@
 import unittest
-
 from ds.vortex.core import baseNode
 from ds.vortex.core import graph
 from ds.vortex.core import plug as plugs
@@ -9,7 +8,6 @@ from ds.vortex.nodes.math.basic import add
 class TestGraph(unittest.TestCase):
     def setUp(self):
         self.graph = graph.Graph(name="testGraph")
-        self.graph.model = "push"
         self.testNode = baseNode.BaseNode("testNode")
         self.testNode2 = baseNode.BaseNode("testNode1")
         self.testNode.addPlug(plugs.InputPlug("testInput", self.testNode))
@@ -87,8 +85,45 @@ class TestGraphDirty(unittest.TestCase):
         self.assertFalse(self.addNode3.getPlug("value2").dirty)
         self.assertFalse(self.addNode3.getPlug("output").dirty)
 
+
+class TestSerialize(unittest.TestCase):
+    def setUp(self):
+        self.graph = graph.Graph("serialGraph")
+
+    def testEmptyGraph(self):
+        savedGraph = self.graph.serializeGraph()
+        self.newGraph = graph.Graph("emptyGraph")
+        self.newGraph.loadGraph(savedGraph)
+        self.assertEquals(len(self.graph), len(self.newGraph))
+
+    def testSerializeNodeToGraph(self):
+        self.graph.addNode(baseNode.BaseNode("testNode"))
+        self.graph.addNode(baseNode.BaseNode("testNode2"))
+        savedGraph = self.graph.serializeGraph()
+        self.newGraph = graph.Graph.loadGraph(savedGraph)
+        self.assertEquals(len(self.graph.nodes), len(self.newGraph.nodes))
+        self.assertEquals(self.graph._name, self.newGraph._name)
+
+    def testSerializeNodePlugsToGraph(self):
+        node = baseNode.BaseNode("testNode")
+        node.addPlug(plugs.InputPlug("testInputPlug", node=node))
+        node.addPlug(plugs.OutputPlug("testOutputPlug", node=node))
+        self.graph.addNode(node)
+        self.graph.addNode(baseNode.BaseNode("testNode2"))
+
+        savedGraph = self.graph.serializeGraph()
+        self.newGraph = graph.Graph.loadGraph(savedGraph)
+        self.assertEquals(len(self.graph.nodes), len(self.newGraph.nodes))
+        self.assertEquals(self.graph._name, self.newGraph._name)
+
+        for index, node in enumerate(self.graph.nodes.values()):
+            self.assertEquals(len(node.plugs), len(self.newGraph.nodes.values()[index].plugs))
+            for plugIndex, plug in enumerate(node.plugs.values()):
+                self.assertEqual(plug.name, self.newGraph.nodes.values()[index].plugs.values()[plugIndex].name)
+
 if __name__ == "__main__":
     import logging
-    logger = logging.getLogger("graph")
+
+    logger = logging.getLogger(__name__)
     logger.setLevel(level=logging.INFO)
     unittest.main(verbosity=2)

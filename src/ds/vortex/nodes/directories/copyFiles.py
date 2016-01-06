@@ -24,6 +24,8 @@ class CopyFilesToNode(baseNode.BaseNode):
         baseNode.BaseNode.compute(self)
         sources = self.getPlug("sourceFiles").value
         destination = self.getPlug("destinationDirectory").value
+        if not os.path.exists(destination) and not os.path.isdir(destination):
+            os.mkdir(destination)
         [shutil.copy2(src, destination) for src in sources]
         result = [os.path.join(destination, os.path.basename(newFile)) for newFile in sources]
         if not result:

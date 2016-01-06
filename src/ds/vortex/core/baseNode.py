@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import logging
+import inspect
 
 logger = logging.getLogger(__name__)
 
@@ -7,6 +8,7 @@ logger = logging.getLogger(__name__)
 class BaseNode(object):
     """Core node class that stores the all the plugs, initialize and compute methods must be overridden in custom nodes
     """
+
     def __init__(self, name):
         """
         :param name: str, the name of the node
@@ -112,6 +114,35 @@ class BaseNode(object):
         """
         logger.debug("Computing {}".format(self.name))
 
+    def serialize(self):
+        """Returns a dict of the nodes data
+        :return:
+        """
+        data = {"name": self.name,
+                "plugs": OrderedDict(),
+                "className": type(self).__name__,
+                "moduleName": inspect.getmodulename(__file__),
+                "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(".py", "")
+                }
+        for plug in self._plugs.values():
+            data["plugs"][plug.name] = plug.serialize()
+        return data
+
+    def addPlugsFromDict(self, plugDict):
+        for plug in plugDict.values():
+            modulePath = plug.get("modulePath")
+            try:
+                module = __import__(modulePath, globals(), locals(), [plug.get("moduleName")], -1)
+            except ImportError, er:
+                logger.error("""importing {0} Failed! , have you typed the right name?,
+                    check self.modulesDict for availablesModules.""".format(modulePath))
+                raise er
+            ioType = plug.get("io")
+            if ioType == "input":
+                self.addPlug(module.InputPlug(name=plug.get("name"), node=self, value=plug.get("value")))
+            else:
+                self.addPlug(module.OutputPlug(name=plug.get("name"), node=self, value=plug.get("value")))
+
     def log(self, tabLevel=-1):
         """Return the hierarchy for this node including the plugs
         :param tabLevel: int, spacing
@@ -132,3 +163,10 @@ class BaseNode(object):
         output += "\n"
 
         return output
+
+
+def getNode():
+    """General function that returns our node, used to get create our node via Ui etc
+    :return: Node instance
+    """
+    return BaseNode

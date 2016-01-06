@@ -1,3 +1,4 @@
+import inspect
 import logging
 
 logger = logging.getLogger(__name__)
@@ -6,6 +7,7 @@ logger = logging.getLogger(__name__)
 class BasePlug(object):
     """Base Plug class , inputs and output plug is derived from this class
     """
+
     def __init__(self, name, node=None, value=None):
         """
         :param name: str, the name for the plug
@@ -129,6 +131,15 @@ class BasePlug(object):
             del plug.connections[plug.connections.index(self)]
         except ValueError:
             logger.debug("Could not find plug in connections")
+
+    def serialize(self):
+        data = {"name": self.name,
+                "io": self.io,
+                "value": self._value,
+                "className": type(self).__name__,
+                "moduleName": inspect.getmodulename(__file__),
+                "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(".py", "")}
+        return data
 
     def log(self, tabLevel=-1):
         """

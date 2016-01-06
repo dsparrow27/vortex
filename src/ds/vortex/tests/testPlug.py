@@ -26,8 +26,13 @@ class TestPlug(unittest.TestCase):
         self.plug.disconnect(floatTypeAttr)
         self.assertEquals(len(self.plug), 0)
 
+    def testSerialize(self):
+        pass
+
+
 if __name__ == "__main__":
     import logging
+
     logger = logging.getLogger(__name__)
     logger.setLevel(level=logging.INFO)
     unittest.main(verbosity=2)

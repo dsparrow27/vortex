@@ -1,4 +1,6 @@
 import logging
+import inspect
+import pprint
 from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
@@ -8,6 +10,7 @@ class Graph(object):
     """This graph class stores the nodes and will evaluate the graph on request, to request a compute you will first need
     the output plug instance and then call Graph.requestEvaluate(outputPlug)
     """
+
     def __init__(self, name="", graph=None):
         """
         :param name: str, the name of the graph
@@ -24,6 +27,9 @@ class Graph(object):
         :return: int, the length of nodes in this graph
         """
         return len(self._nodes)
+
+    def __eq__(self, other):
+        return isinstance(other, Graph) and self._nodes == other.nodes
 
     def addNode(self, node, **kwargs):
         """Adds a Node instance to the graph this will also add the node to the graph class instance as a attribute
@@ -48,6 +54,10 @@ class Graph(object):
         :return: OrderedDict
         """
         return self._nodes
+
+    @nodes.setter
+    def nodes(self, newNodes):
+        self._nodes = newNodes
 
     def hasNode(self, node):
         """Checks the graph for the given node _name
@@ -127,8 +137,37 @@ class Graph(object):
         logger.debug("computed output is::{0}, nodeName::{1}, plug::{2}".format(outputPlug.value, node.name,
                                                                                 outputPlug.name))
 
-    def saveGraph(self):
-        serializedGraph = {}
+    def serializeGraph(self):
+        logger.debug("serializing graph")
+        serializedGraph = {"name": self._name,
+                           "version": "1.0.0",
+                           "nodes": OrderedDict(),
+                           "className": type(self).__name__,
+                           "moduleName": inspect.getmodulename(__file__),
+                           "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(
+                               ".py", "")
+                           }
+        logger.debug(serializedGraph)
+        for node in self._nodes.values():
+            serializedGraph["nodes"][node.name] = node.serialize()
+
+        return serializedGraph
+
+    @classmethod
+    def loadGraph(cls, graphData):
+        graph = cls(name=graphData.get("name"))
+        for node in graphData["nodes"].values():
+            modulePath = node.get("modulePath")
+            try:
+                module = __import__(modulePath, globals(), locals(), [node.get("moduleName")], -1)
+            except ImportError, er:
+                logger.error("""importing {0} Failed! , have you typed the right name?,
+                    check self.modulesDict for availablesModules.""".format(modulePath))
+                raise er
+            newNode = module.getNode()(name=node.get("name"))
+            newNode.addPlugsFromDict(node.get("plugs"))
+            graph.addNode(newNode)
+        return graph
 
 
 class IncrementObject(object):

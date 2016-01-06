@@ -116,7 +116,7 @@ class BaseNode(object):
 
     def serialize(self):
         """Returns a dict of the nodes data
-        :return:
+        :return: dict
         """
         data = {"name": self.name,
                 "plugs": OrderedDict(),
@@ -129,6 +129,9 @@ class BaseNode(object):
         return data
 
     def addPlugsFromDict(self, plugDict):
+        """Creates plug objects for the node based on the plugDict
+        :param plugDict: dict
+        """
         for plug in plugDict.values():
             modulePath = plug.get("modulePath")
             try:

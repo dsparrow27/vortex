@@ -1,6 +1,5 @@
 import logging
 import inspect
-import pprint
 from collections import OrderedDict
 
 logger = logging.getLogger(__name__)

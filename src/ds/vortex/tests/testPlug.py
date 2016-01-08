@@ -13,14 +13,18 @@ class TestPlug(unittest.TestCase):
     def testConnect(self):
         inputAttr = plugs.InputPlug(name="testInput")
         outputAttr = plugs.OutputPlug(name="testOutput")
-        floatTypeAttr = plugs.OutputPlug(name="testOutput")
         self.plug.connect(outputAttr)
-        self.plug.connect(floatTypeAttr)
+        self.assertEquals(self.plug.connections[0].name, self.plug.name + "_" + outputAttr.name)
+        self.assertEquals(self.plug.connections[0].input, self.plug)
+        self.assertEquals(self.plug.connections[0].output, outputAttr)
         self.assertTrue(self.plug.isConnected())
+        self.assertTrue(outputAttr.isConnected())
+        self.assertTrue(outputAttr.isConnectedTo(self.plug))
+        self.assertEquals(outputAttr.getConnection(self.plug), self.plug.connections[0])
         #  failed to connect as plug already exists
         self.assertIsNone(self.plug.connect(inputAttr))
 
-    def remove(self):
+    def testDisconnect(self):
         floatTypeAttr = plugs.OutputPlug(name="testOutput")
         self.plug.connect(floatTypeAttr)
         self.plug.disconnect(floatTypeAttr)

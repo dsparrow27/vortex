@@ -22,8 +22,10 @@ class TestBaseNode(unittest.TestCase):
         self.assertEquals(self.node.getPlug("testPlug"), self.plug)
         self.node.deletePlug(self.plug)
         self.assertEquals(self.node.getPlug("testPlug"), None)
+
     def testSerialize(self):
         pass
+
 
 class TestAddNode(unittest.TestCase):
     def setUp(self):
@@ -101,6 +103,6 @@ class TestInvertNode(unittest.TestCase):
 if __name__ == "__main__":
     import logging
 
-    logger = logging.getLogger("baseNode")
+    logger = logging.getLogger(__name__)
     logger.setLevel(level=logging.INFO)
     unittest.main(verbosity=2)

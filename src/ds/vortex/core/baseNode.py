@@ -72,9 +72,9 @@ class BaseNode(object):
         for plug in self.outputs():
             # walk if connected
             if plug.isConnected():
-                for inputPlug in plug.connections:
-                    inputPlug.dirty = True
-                    node = inputPlug.node
+                for edge in plug.connections:
+                    edge.input.dirty = True
+                    node = edge.input.node
                     # if we haven't visited this node before then call setDownStreamDirty on it
                     if node not in visitedNodes:
                         node.setDownStreamDirty()
@@ -138,7 +138,7 @@ class BaseNode(object):
                 module = __import__(modulePath, globals(), locals(), [plug.get("moduleName")], -1)
             except ImportError, er:
                 logger.error("""importing {0} Failed! , have you typed the right name?,
-                    check self.modulesDict for availablesModules.""".format(modulePath))
+                    check self.modulesDict for availables Modules.""".format(modulePath))
                 raise er
             ioType = plug.get("io")
             if ioType == "input":

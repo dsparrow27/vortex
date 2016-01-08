@@ -1,6 +1,7 @@
 import logging
 import inspect
 from collections import OrderedDict
+import baseEdge
 
 logger = logging.getLogger(__name__)
 
@@ -83,8 +84,10 @@ class Graph(object):
         :param node: node Instance
         :return: str, returns the new node name as a string
         """
-        increObj = IncrementObject(0, 2)
+        increObj = IncrementObject(0, 1)
         num = increObj.add()
+        if node.name not in self._nodes:
+            return node.name
         name = node.name + num
         while name in self._nodes:
             name = node.name + increObj.add()
@@ -104,8 +107,7 @@ class Graph(object):
         leafNodes = []
 
         for node in self._nodes.values():
-
-            if not any(plug.connections for plug in node.inputs()):
+            if not all(plug.connections for plug in node.inputs()):
                 leafNodes.append(node)
 
         return leafNodes
@@ -125,11 +127,10 @@ class Graph(object):
                     # mark clean
                     plug.dirty = False
                     continue
-                connectedPlug = plug.connections[0]
-                logger.debug("requesting plug ::{0}, nodeName::{1}".format(connectedPlug.name, connectedPlug.node.name))
-                if connectedPlug.dirty:
-                    self.requestEvaluate(connectedPlug)
-                plug.value = connectedPlug.value
+                connectedEdge = plug.connections[0]
+                if connectedEdge.output.dirty:
+                    self.requestEvaluate(connectedEdge.output)
+                plug.value = connectedEdge.output.value
                 plug.dirty = False
 
         node.compute()
@@ -141,6 +142,7 @@ class Graph(object):
         serializedGraph = {"name": self._name,
                            "version": "1.0.0",
                            "nodes": OrderedDict(),
+                           "edges": dict(),
                            "className": type(self).__name__,
                            "moduleName": inspect.getmodulename(__file__),
                            "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(
@@ -149,7 +151,9 @@ class Graph(object):
         logger.debug(serializedGraph)
         for node in self._nodes.values():
             serializedGraph["nodes"][node.name] = node.serialize()
-
+            for plug in node.outputs():
+                for edge in plug.connections:
+                    serializedGraph["edges"][edge.name] = edge.serialize()
         return serializedGraph
 
     @classmethod
@@ -161,11 +165,20 @@ class Graph(object):
                 module = __import__(modulePath, globals(), locals(), [node.get("moduleName")], -1)
             except ImportError, er:
                 logger.error("""importing {0} Failed! , have you typed the right name?,
-                    check self.modulesDict for availablesModules.""".format(modulePath))
+                    check nodes package.""".format(modulePath))
                 raise er
             newNode = module.getNode()(name=node.get("name"))
             newNode.addPlugsFromDict(node.get("plugs"))
+
             graph.addNode(newNode)
+
+        for edge in graphData["edges"].values():
+            inputPlug = graph.getNode(edge["input"][1]).getPlug(edge["input"][0])
+            outputPlug = graph.getNode(edge["output"][1]).getPlug(edge["output"][0])
+            newEdge = baseEdge.Edge(name=edge["name"], input=inputPlug, output=outputPlug)
+            inputPlug._connections = [newEdge]
+            outputPlug._connections.append(newEdge)
+
         return graph
 
 

@@ -1,5 +1,6 @@
 import inspect
 import logging
+from ds.vortex.core import baseEdge
 
 logger = logging.getLogger(__name__)
 
@@ -96,23 +97,6 @@ class BasePlug(object):
         """
         return self._io == "output"
 
-    def connect(self, plug):
-        """Connects two attributes together if self isInput type then if there's a current connections then this gets
-        replaced.
-        :param plug: BasePlug instance
-        :return: None
-        """
-        self._connections.append(plug)
-        if self not in plug.connections:
-            plug.connect(self)
-        if self.isInput():
-            try:
-                self.node.setDownStreamDirty()
-            except AttributeError:
-                logger.debug("plug has no node parent::{}".format(self.name))
-
-            self.dirty = True
-
     def isConnected(self):
         """Returns True if self is connected to another plug
         :return: bool
@@ -121,24 +105,47 @@ class BasePlug(object):
             return True
         return False
 
+    def isConnectedTo(self, plug):
+        for edge in self._connections:
+            if edge.isConnected(self, plug):
+                return True
+        return False
+
+    def getConnection(self, plug):
+        for edge in self._connections:
+            match = edge.isConnected(self, plug)
+            if match:
+                return edge
+
     def disconnect(self, plug):
         """Removes the plug from the connections list
         :param plug: plug instance
         :return: None
         """
-        try:
-            del self._connections[self._connections.index(plug)]
-            del plug.connections[plug.connections.index(self)]
-        except ValueError:
-            logger.debug("Could not find plug in connections")
+        logger.debug("Could not find plug in connections")
+        for index, edge in enumerate(self._connections):
+            if edge.isConnected(self, plug):
+                edge.delete()
+
+    def connect(self, plug):
+        """Connects two attributes together if self isInput type then if there's a current connections then this gets
+        replaced.
+        :param plug: BasePlug, InputPlug or Outputplug instance
+        :return: edge
+        """
+        logger.debug("connecting plugs::".format(plug.name, self.name))
 
     def serialize(self):
+        """Serializes the plug as a dict
+        :return: dict,
+        """
         data = {"name": self.name,
                 "io": self.io,
                 "value": self._value,
                 "className": type(self).__name__,
                 "moduleName": inspect.getmodulename(__file__),
-                "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(".py", "")}
+                "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(".py", "")
+                }
         return data
 
     def log(self, tabLevel=-1):
@@ -197,9 +204,22 @@ class InputPlug(BasePlug):
         :param plug:
         :return:
         """
+        if plug.isInput() or self.getConnection(plug):
+            return
+        edge = baseEdge.Edge(self.name + "_" + plug.name, input=self, output=plug)
+        if self._connections:
+            self._connections[0].delete()
         # inputs can only have a single connection
-        self._connections = []
-        super(InputPlug, self).connect(plug)
+        self._connections = [edge]
+        plug.connect(self)
+        try:
+            self.node.setDownStreamDirty()
+        except AttributeError:
+            logger.debug("plug has no node parent::{}".format(self.name))
+
+        self.dirty = True
+
+        return edge
 
 
 class OutputPlug(BasePlug):
@@ -212,3 +232,11 @@ class OutputPlug(BasePlug):
         """
         BasePlug.__init__(self, name, node, value)
         self._io = "output"
+
+    def connect(self, plug):
+        if not self.isConnectedTo(plug):
+            edge = plug.getConnection(self)
+            if not edge:
+                edge = baseEdge.Edge(self.name + "_" + plug.name, input=plug, output=self)
+            self._connections.append(edge)
+            plug.connect(self)

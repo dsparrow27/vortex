@@ -13,16 +13,22 @@ class FloorNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value", self), 0, clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.valuePlug_ = plugs.InputPlug("value", self, value=0)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        result = math.floor(self.getPlug("value").value)
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.valuePlug_, clean=True)
+
+        self.plugAffects(self.valuePlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        result = math.floor(self.valuePlug_.value)
+
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

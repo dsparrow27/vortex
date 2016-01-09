@@ -1,8 +1,8 @@
 from collections import OrderedDict
-import logging
+from ds.vortex import customLogger as cusLogger
 import inspect
 
-logger = logging.getLogger(__name__)
+logger = cusLogger.getCustomLogger()
 
 
 class BaseNode(object):
@@ -32,6 +32,19 @@ class BaseNode(object):
         :return: int, the length of the plugs
         """
         return len(self._plugs)
+
+    @staticmethod
+    def plugAffects(inputPlug, outputPlug):
+        logger.debug("Setting plug affection:: inputPlug > {0}, outputPlug > {1}".format(inputPlug.name, outputPlug.name))
+        inputPlug.affects.add(outputPlug)
+        outputPlug.affects.add(inputPlug)
+
+    @staticmethod
+    def getPlugAffects(plug):
+        affection = plug.affects
+        logger.debug(
+            "got plug affection:: plug > {0}, affected by > {1}".format(plug.name, [affect.name for affect in affection]))
+        return affection
 
     @property
     def plugs(self):
@@ -64,12 +77,12 @@ class BaseNode(object):
         """
         del self._plugs[plug.name]
 
-    def setDownStreamDirty(self):
+    def setDownStreamDirty(self, inputPlug):
         """Sets all the output plugs on the node to dirty , if the plug is connected then walk the connected plugs
         setting the dirty flag on each plug as we go
         """
         visitedNodes = []
-        for plug in self.outputs():
+        for plug in inputPlug.affects:
             # walk if connected
             if plug.isConnected():
                 for edge in plug.connections:
@@ -77,7 +90,7 @@ class BaseNode(object):
                     node = edge.input.node
                     # if we haven't visited this node before then call setDownStreamDirty on it
                     if node not in visitedNodes:
-                        node.setDownStreamDirty()
+                        node.setDownStreamDirty(inputPlug=edge.input)
                         visitedNodes.append(node)
                         continue
             plug.dirty = True
@@ -108,7 +121,7 @@ class BaseNode(object):
         """
         pass
 
-    def compute(self):
+    def compute(self, requestPlug=None):
         """Intended to be overridden
         :return: None
         """

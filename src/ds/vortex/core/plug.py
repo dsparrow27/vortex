@@ -1,8 +1,7 @@
 import inspect
-import logging
 from ds.vortex.core import baseEdge
-
-logger = logging.getLogger(__name__)
+from ds.vortex import customLogger as customLogger
+log = customLogger.getCustomLogger()
 
 
 class BasePlug(object):
@@ -21,7 +20,7 @@ class BasePlug(object):
         self._connections = []
         self._dirty = False  # false is clean
         self._value = value
-        self.attributeAffect = None
+        self.affects = set()
 
     def __repr__(self):
         return "{}{}".format(self.__class__, self.__dict__)
@@ -122,7 +121,7 @@ class BasePlug(object):
         :param plug: plug instance
         :return: None
         """
-        logger.debug("Could not find plug in connections")
+        log.debug("Could not find plug in connections")
         for index, edge in enumerate(self._connections):
             if edge.isConnected(self, plug):
                 edge.delete()
@@ -133,7 +132,7 @@ class BasePlug(object):
         :param plug: BasePlug, InputPlug or Outputplug instance
         :return: edge
         """
-        logger.debug("connecting plugs::".format(plug.name, self.name))
+        log.debug("connecting plugs::".format(plug.name, self.name))
 
     def serialize(self):
         """Serializes the plug as a dict
@@ -190,13 +189,13 @@ class InputPlug(BasePlug):
 
     @value.setter
     def value(self, value):
-        """sets the value of the plug and sets the plug dirty, calls on the parent node setDownStreamDirty()
+        """sets the value of the plug and sets the plug dirty, calls on the parent node setDownStreamDirty(inputPlug)
         :param value: the value to set
         """
         # pass the value to all connected plugs if it is connected
         self._value = value
         self.dirty = True
-        self._node.setDownStreamDirty()
+        self._node.setDownStreamDirty(self)
 
     def connect(self, plug):
         """creates a connection between to plugs, a input can only have one input so current connections is cleared
@@ -213,9 +212,9 @@ class InputPlug(BasePlug):
         self._connections = [edge]
         plug.connect(self)
         try:
-            self.node.setDownStreamDirty()
+            self.node.setDownStreamDirty(self)
         except AttributeError:
-            logger.debug("plug has no node parent::{}".format(self.name))
+            log.debug("plug has no node parent::{}".format(self.name))
 
         self.dirty = True
 

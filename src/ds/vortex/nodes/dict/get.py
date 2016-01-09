@@ -11,17 +11,24 @@ class GetKeyNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value", self), {}, clean=True)
-        self.addPlug(plugs.InputPlug("key", self), "", clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.valuePlug_ = plugs.InputPlug("value", self, value={})
+        self.keyPlug_ = plugs.InputPlug("key", self, value="")
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        result = self.getPlug("value").value.get(self.getPlug("key"))
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.valuePlug_, clean=True)
+        self.addPlug(self.keyPlug_, clean=True)
+
+        self.plugAffects(self.valuePlug_, self.outputPlug_)
+        self.plugAffects(self.keyPlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        result = self.valuePlug_.value.get(self.keyPlug_.value)
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

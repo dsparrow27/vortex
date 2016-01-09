@@ -11,18 +11,26 @@ class ArrayAppend(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value1", self), [], clean=True)
-        self.addPlug(plugs.InputPlug("value2", self), "", clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.value1Plug_ = plugs.InputPlug("value1", self, value=[])
+        self.value2Plug_ = plugs.InputPlug("value2", self, value="")
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        self.getPlug("value1").value.append(self.getPlug("value2").value)
-        result = self.getPlug("value1").value
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.value1Plug_, clean=True)
+        self.addPlug(self.value2Plug_, clean=True)
+
+        self.plugAffects(self.value1Plug_, self.outputPlug_)
+        self.plugAffects(self.value2Plug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        self.value1Plug_.value.append(self.value2Plug_.value)
+        result = self.value1Plug_.value
+
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

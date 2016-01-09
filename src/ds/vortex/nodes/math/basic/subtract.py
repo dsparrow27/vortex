@@ -12,17 +12,27 @@ class SubtractNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value1", self), 0, clean=True)
-        self.addPlug(plugs.InputPlug("value2", self), 0, clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.valuePlug_ = plugs.InputPlug("value", self, value=0)
+        self.subtractPlug_ = plugs.InputPlug("subtract", self, value=0)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        result = self.getPlug("value1").value - self.getPlug("value2").value
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.valuePlug_, clean=True)
+        self.addPlug(self.subtractPlug_, clean=True)
+
+        self.plugAffects(self.valuePlug_, self.outputPlug_)
+        self.plugAffects(self.subtractPlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+
+        result = self.valuePlug_.value - self.subtractPlug_.value
+
+        requestPlug.value = result
+        requestPlug.dirty = False
+
         return result
 
 

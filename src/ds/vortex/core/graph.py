@@ -1,9 +1,9 @@
-import logging
 import inspect
 from collections import OrderedDict
 import baseEdge
+from ds.vortex import customLogger
 
-logger = logging.getLogger(__name__)
+logger = customLogger.getCustomLogger()
 
 
 class Graph(object):
@@ -121,7 +121,7 @@ class Graph(object):
             return outputPlug.value
 
         node = outputPlug.node
-        for plug in node.inputs():
+        for plug in node.getPlugAffects(outputPlug):
             if plug.dirty:
                 if not plug.isConnected():
                     # mark clean
@@ -133,7 +133,8 @@ class Graph(object):
                 plug.value = connectedEdge.output.value
                 plug.dirty = False
 
-        node.compute()
+        node.compute(requestPlug=outputPlug)
+
         logger.debug("computed output is::{0}, nodeName::{1}, plug::{2}".format(outputPlug.value, node.name,
                                                                                 outputPlug.name))
 
@@ -164,7 +165,7 @@ class Graph(object):
             try:
                 module = __import__(modulePath, globals(), locals(), [node.get("moduleName")], -1)
             except ImportError, er:
-                logger.error("""importing {0} Failed! , have you typed the right name?,
+                customLogger.error("""importing {0} Failed! , have you typed the right name?,
                     check nodes package.""".format(modulePath))
                 raise er
             newNode = module.getNode()(name=node.get("name"))

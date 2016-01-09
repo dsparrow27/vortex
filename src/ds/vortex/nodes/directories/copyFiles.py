@@ -1,6 +1,5 @@
 import os
 import shutil
-
 from ds.vortex.core import baseNode
 from ds.vortex.core import plug as plugs
 
@@ -8,6 +7,7 @@ from ds.vortex.core import plug as plugs
 class CopyFilesToNode(baseNode.BaseNode):
     """Copy a list of files to a directory and returns the new file paths
     """
+
     def __init__(self, name):
         """
         :param name: str, the name of the node
@@ -16,24 +16,30 @@ class CopyFilesToNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("sourceFiles", self), [], clean=True)
-        self.addPlug(plugs.InputPlug("destinationDirectory", self), "", clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.sourceFile_ = plugs.InputPlug("sourceFiles", self, value=[])
+        self.destinationDirectoryPlug_ = plugs.InputPlug("destinationDirectory", self, value="")
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        sources = self.getPlug("sourceFiles").value
-        destination = self.getPlug("destinationDirectory").value
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.sourceFile_, clean=True)
+        self.addPlug(self.destinationDirectoryPlug_, clean=True)
+
+        self.plugAffects(self.sourceFile_, self.outputPlug_)
+        self.plugAffects(self.destinationDirectoryPlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        sources = self.sourceFile_.value
+        destination = self.destinationDirectoryPlug_.value
         if not os.path.exists(destination) and not os.path.isdir(destination):
             os.mkdir(destination)
         [shutil.copy2(src, destination) for src in sources]
         result = [os.path.join(destination, os.path.basename(newFile)) for newFile in sources]
-        if not result:
-            return
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

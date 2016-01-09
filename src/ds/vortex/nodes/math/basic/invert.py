@@ -4,7 +4,6 @@ from ds.vortex.core import plug as plugs
 
 class InvertNode(baseNode.BaseNode):
 
-
     def __init__(self, name):
         """
         :param name: str, the name of the node
@@ -13,17 +12,22 @@ class InvertNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value", self), clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.valuePlug_ = plugs.InputPlug("value", self, value=0)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        value = self.getPlug("value").value
-        result = value * -1
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.valuePlug_, clean=True)
+
+        self.plugAffects(self.valuePlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        result = self.valuePlug_.value * -1
+
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

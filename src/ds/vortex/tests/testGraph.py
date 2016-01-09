@@ -128,7 +128,7 @@ class TestSerialize(unittest.TestCase):
                 newGraphPlug = newGraphNode.plugs.values()[plugIndex]
                 self.assertEqual(plug.name, newGraphPlug.name)
                 self.assertEquals(len(plug.connections), len(newGraphPlug.connections))
-
+        self.assertIsInstance(savedGraph, dict)
         correctDict = {'className': 'Graph',
                        'edges': {'testOutputPlug2_testInputPlug': {'arbitraryData': None,
                                                                    'className': 'Edge',

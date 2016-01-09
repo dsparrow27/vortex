@@ -14,20 +14,25 @@ class SearchStringNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value", self), [], clean=True)
-        self.addPlug(plugs.InputPlug("searchValue", self), "", clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.valuePlug_ = plugs.InputPlug("value", self, value=[])
+        self.searchPlug_ = plugs.InputPlug("searchValue", self, value="")
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        result = [char for char in [self.getPlug("value").value] if re.search(self.getPlug("searchValue").value, char)]
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.valuePlug_, clean=True)
+        self.addPlug(self.searchPlug_, clean=True)
 
-        if result is None:
-            return
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        self.plugAffects(self.valuePlug_, self.outputPlug_)
+        self.plugAffects(self.searchPlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        result = [char for char in [self.valuePlug_.value] if re.search(self.searchPlug_.value, char)]
+
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

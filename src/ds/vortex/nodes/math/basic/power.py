@@ -12,17 +12,27 @@ class PowerNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value1", self), 0, clean=True)
-        self.addPlug(plugs.InputPlug("value2", self), 0, clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.value1Plug_ = plugs.InputPlug("value1", self, value=0)
+        self.value2Plug_ = plugs.InputPlug("value2", self, value=0)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        result = self.getPlug("value1").value ** self.getPlug("value2").value
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.value1Plug_, clean=True)
+        self.addPlug(self.value2Plug_, clean=True)
+
+        self.plugAffects(self.value1Plug_, self.outputPlug_)
+        self.plugAffects(self.value2Plug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+
+        result = self.value1Plug_.value ** self.value2Plug_.value
+
+        requestPlug.value = result
+        requestPlug.dirty = False
+
         return result
 
 

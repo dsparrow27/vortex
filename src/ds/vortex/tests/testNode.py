@@ -9,22 +9,35 @@ from ds.vortex.nodes.math.basic import invert
 class TestBaseNode(unittest.TestCase):
     def setUp(self):
         self.node = baseNode.BaseNode("testNode")
-        self.plug = plug.BasePlug("testPlug", self.node)
+        self.plug = plug.InputPlug("testPlug", self.node)
+        self.node.addPlug(self.plug)
 
     def testAddPlug(self):
-        self.node.addPlug(self.plug)
+        newplug = plug.InputPlug("testPlug1", self.node)
+        self.node.addPlug(newplug)
+        self.assertEquals(len(self.node.plugs), 2)
+        self.node.deletePlug(newplug)
         self.assertEquals(len(self.node.plugs), 1)
-        self.node.deletePlug(self.plug)
-        self.assertEquals(len(self.node.plugs), 0)
 
     def testGetPlug(self):
-        self.node.addPlug(self.plug)
         self.assertEquals(self.node.getPlug("testPlug"), self.plug)
         self.node.deletePlug(self.plug)
         self.assertEquals(self.node.getPlug("testPlug"), None)
 
+    def testGetAttributeAffects(self):
+        outputPlug1 = plug.OutputPlug("testOutPlug1", self.node)
+        outputPlug2 = plug.OutputPlug("testOutPlug2", self.node)
+        inputPlug2 = plug.InputPlug("testinPlug2", self.node)
+        self.node.atttributeAffects(self.plug, outputPlug1)
+        self.node.atttributeAffects(inputPlug2, outputPlug1)
+        self.node.atttributeAffects(inputPlug2, outputPlug2)
+        self.assertEqual(self.node.getAttributeAffects(outputPlug1), [self.plug, inputPlug2])
+        self.assertEqual(self.node.getAttributeAffects(outputPlug2), [inputPlug2])
+        self.assertEqual(self.node.getAttributeAffects(self.plug), [outputPlug1])
+        self.assertEqual(self.node.getAttributeAffects(inputPlug2), [outputPlug1, outputPlug2])
+
     def testSerialize(self):
-        pass
+        data = self.node.serialize()
 
 
 class TestAddNode(unittest.TestCase):

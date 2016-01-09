@@ -11,4 +11,8 @@ def createTestSuites():
 
 
 if __name__ == "__main__":
+    from ds.vortex import customLogger
+
+    logger = customLogger.getCustomLogger()
+    unittest.main(verbosity=2)
     unittest.TextTestRunner(verbosity=2).run(createTestSuites())

@@ -190,8 +190,7 @@ class TestSerialize(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    import logging
+    from ds.vortex import customLogger
 
-    logger = logging.getLogger(__name__)
-    logger.setLevel(level=logging.INFO)
+    logger = customLogger.getCustomLogger()
     unittest.main(verbosity=2)

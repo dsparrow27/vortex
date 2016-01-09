@@ -189,13 +189,13 @@ class InputPlug(BasePlug):
 
     @value.setter
     def value(self, value):
-        """sets the value of the plug and sets the plug dirty, calls on the parent node setDownStreamDirty()
+        """sets the value of the plug and sets the plug dirty, calls on the parent node setDownStreamDirty(inputPlug)
         :param value: the value to set
         """
         # pass the value to all connected plugs if it is connected
         self._value = value
         self.dirty = True
-        self._node.setDownStreamDirty()
+        self._node.setDownStreamDirty(self)
 
     def connect(self, plug):
         """creates a connection between to plugs, a input can only have one input so current connections is cleared
@@ -212,7 +212,7 @@ class InputPlug(BasePlug):
         self._connections = [edge]
         plug.connect(self)
         try:
-            self.node.setDownStreamDirty()
+            self.node.setDownStreamDirty(self)
         except AttributeError:
             log.debug("plug has no node parent::{}".format(self.name))
 

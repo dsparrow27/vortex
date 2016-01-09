@@ -1,6 +1,7 @@
 import unittest
 from collections import OrderedDict
 from ds.vortex.core import baseNode, plug
+from ds.vortex.nodes.math.basic import add
 
 
 class TestBaseNode(unittest.TestCase):
@@ -32,6 +33,20 @@ class TestBaseNode(unittest.TestCase):
         self.assertEqual(self.node.getPlugAffects(outputPlug2), set([inputPlug2]))
         self.assertEqual(self.node.getPlugAffects(self.plug), set([outputPlug1]))
         self.assertEqual(self.node.getPlugAffects(inputPlug2), set([outputPlug1, outputPlug2]))
+
+    def testAttributeAffectsDirty(self):
+        newNode = add.AddNode("addNode")
+        valuePlug = newNode.getPlug("value1")
+        newPlug = plug.OutputPlug(name="testPlug", node=newNode)
+        newNode.addPlug(newPlug, clean=True)
+        newNode.plugAffects(newNode.getPlug("value2"), newPlug)
+        self.assertEquals(newNode.getPlug("value1").dirty, False)
+        valuePlug.value = 10
+        self.assertEquals(newPlug.dirty, False)
+        newNode.compute(newNode.getPlug("output"))
+        self.assertEquals(newPlug.dirty, False)
+        newNode.getPlug("value2").value = 50
+        self.assertEquals(newPlug.dirty, True)
 
     def testSerialize(self):
         data = self.node.serialize()

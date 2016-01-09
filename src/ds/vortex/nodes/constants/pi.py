@@ -12,17 +12,17 @@ class PiNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.addPlug(self.outputPlug_, clean=True)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        result = math.pi
-        if result is None:
-            return
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        result = math.pi()
+
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

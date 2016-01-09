@@ -11,25 +11,31 @@ class SplitStringNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value", self), "", clean=True)
-        self.addPlug(plugs.InputPlug("delimiter", self), "", clean=True)
-        self.addPlug(plugs.InputPlug("returnIndex", self), None, clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.valuePlug_ = plugs.InputPlug("value", self, value=[])
+        self.delimiterPlug_ = plugs.InputPlug("delimiter", self, value="")
+        self.returnIndexPlug_ = plugs.InputPlug("returnIndex", self, value=None)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        result = str(self.getPlug("value").value).split(self.getPlug("delimiter").value)
-        returnIndex = self.getPlug("returnIndex").value
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.valuePlug_, clean=True)
+
+        self.plugAffects(self.valuePlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        result = str(self.valuePlug_.value).split(self.delimiterPlug_.value)
+        returnIndex = self.returnIndexPlug_.value
 
         if returnIndex:
             returnIndex = int(returnIndex)
             result = result[returnIndex]
 
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
+
 
 
 def getNode():

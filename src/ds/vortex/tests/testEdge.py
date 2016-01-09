@@ -1,4 +1,3 @@
-import pprint
 import unittest
 from ds.vortex.core import baseEdge
 from ds.vortex.core import plug
@@ -41,6 +40,7 @@ class TestCase(unittest.TestCase):
                          "output": None,
                          "arbitraryData": None
                          }
+        self.assertIsInstance(data, dict)
         self.assertEquals(data, correctData)
         self.assertNotEquals(data, incorrectData)
 

@@ -11,21 +11,28 @@ class IfNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.InputPlug("condition", self), True, clean=True)
-        self.addPlug(plugs.InputPlug("ifTrue", self), 0, clean=True)
-        self.addPlug(plugs.InputPlug("ifFalse", self), 0, clean=True)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
+        self.outputPlug_ = self.addPlug(self.outputPlug_, clean=True)
+        self.conditionPlug_ = plugs.InputPlug("condition", self, value=True)
+        self.ifTruePlug_ = plugs.InputPlug("ifTrue", self, value=0)
+        self.ifFalsePlug = plugs.InputPlug("ifFalse", self, value=0)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        if self.getPlug("condition").value:
-            result = self.getPlug("ifTrue").value
+        self.addPlug(self.conditionPlug_, clean=True)
+        self.addPlug(self.ifTruePlug_, clean=True)
+        self.addPlug(self.ifFalsePlug, clean=True)
+
+        self.plugAffects(self.conditionPlug_, self.outputPlug_)
+        self.plugAffects(self.ifTruePlug_, self.outputPlug_)
+        self.plugAffects(self.ifFalsePlug, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if self.conditionPlug_.value:
+            result = self.ifTruePlug_.value
         else:
-            result = self.getPlug("ifFalse").value
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+            result = self.ifFalsePlug.value
+
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

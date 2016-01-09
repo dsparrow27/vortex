@@ -16,7 +16,7 @@ class ToArray(baseNode.BaseNode):
 
     def compute(self):
         baseNode.BaseNode.compute(self)
-        result = list(self.getPlug("value").value)
+        result = (self.getPlug("value").value)
         output = self.getPlug("output")
         if output is not None:
             output.value = result

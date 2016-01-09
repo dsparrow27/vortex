@@ -12,20 +12,27 @@ class RenameNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("source", self), [], clean=True)
-        self.addPlug(plugs.InputPlug("destination", self), [], clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.sourcePlug_ = plugs.InputPlug("source", self, [])
+        self.destinationPlug_ = plugs.InputPlug("destination", self, [])
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        source = list(self.getPlug("source").value)
-        destination = list(self.getPlug("destination").value)
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.sourcePlug_, clean=True)
+        self.addPlug(self.destinationPlug_, clean=True)
+
+        self.plugAffects(self.sourcePlug_, self.outputPlug_)
+        self.plugAffects(self.destinationPlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        source = list(self.sourcePlug_.value)
+        destination = list(self.destinationPlug_.value)
         [os.rename(src, destination[i]) for i, src in enumerate(source)]
 
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = destination
-        output.dirty = False
+        requestPlug.value = destination
+        requestPlug.dirty = False
         return destination
 
 

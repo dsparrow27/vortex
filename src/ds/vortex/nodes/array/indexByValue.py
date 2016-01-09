@@ -11,22 +11,31 @@ class ArrayIndexNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("array", self), [], clean=True)
-        self.addPlug(plugs.InputPlug("value", self), 0, clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.addPlug(self.outputPlug_, clean=True)
+        self.arrayPlug_ = plugs.OutputPlug("array", self, value=[])
+        self.valuePlug_ = plugs.InputPlug("value", self, value=0)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        value = self.getPlug("value").value
-        array = self.getPlug("array").value
+        self.addPlug(self.arrayPlug_, clean=True)
+        self.addPlug(self.valuePlug_, clean=True)
+
+        self.plugAffects(self.arrayPlug_, self.outputPlug_)
+        self.plugAffects(self.valuePlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
+        value = self.valuePlug_.value
+        array = self.arrayPlug_.value
+
         if value in array:
             result = array.index(value)
         else:
             return
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        requestPlug.value = result
+        requestPlug.dirty = False
+
         return result
 
 

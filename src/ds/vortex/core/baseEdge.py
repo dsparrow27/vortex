@@ -1,4 +1,7 @@
 import inspect
+from ds.vortex import customLogger as customLogger
+
+logger = customLogger.getCustomLogger()
 
 
 class Edge(object):

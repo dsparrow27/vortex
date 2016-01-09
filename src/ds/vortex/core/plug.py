@@ -1,8 +1,8 @@
 import inspect
-import logging
 from ds.vortex.core import baseEdge
-
-logger = logging.getLogger(__name__)
+from ds.vortex import customLogger as customLogger
+log = customLogger.getCustomLogger()
+print log
 
 
 class BasePlug(object):
@@ -21,7 +21,7 @@ class BasePlug(object):
         self._connections = []
         self._dirty = False  # false is clean
         self._value = value
-        self.attributeAffect = None
+        self.affects = set()
 
     def __repr__(self):
         return "{}{}".format(self.__class__, self.__dict__)
@@ -122,7 +122,7 @@ class BasePlug(object):
         :param plug: plug instance
         :return: None
         """
-        logger.debug("Could not find plug in connections")
+        log.debug("Could not find plug in connections")
         for index, edge in enumerate(self._connections):
             if edge.isConnected(self, plug):
                 edge.delete()
@@ -133,7 +133,7 @@ class BasePlug(object):
         :param plug: BasePlug, InputPlug or Outputplug instance
         :return: edge
         """
-        logger.debug("connecting plugs::".format(plug.name, self.name))
+        log.debug("connecting plugs::".format(plug.name, self.name))
 
     def serialize(self):
         """Serializes the plug as a dict
@@ -215,7 +215,7 @@ class InputPlug(BasePlug):
         try:
             self.node.setDownStreamDirty()
         except AttributeError:
-            logger.debug("plug has no node parent::{}".format(self.name))
+            log.debug("plug has no node parent::{}".format(self.name))
 
         self.dirty = True
 

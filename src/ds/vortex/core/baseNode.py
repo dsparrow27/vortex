@@ -1,8 +1,8 @@
 from collections import OrderedDict
-import logging
+from ds.vortex import customLogger as cusLogger
 import inspect
 
-logger = logging.getLogger(__name__)
+logger = cusLogger.getCustomLogger()
 
 
 class BaseNode(object):
@@ -32,6 +32,19 @@ class BaseNode(object):
         :return: int, the length of the plugs
         """
         return len(self._plugs)
+
+    @staticmethod
+    def plugAffects(inputPlug, outputPlug):
+        logger.debug("Setting plug affection:: inputPlug > {0}, outputPlug > {1}".format(inputPlug.name, outputPlug.name))
+        inputPlug.affects.add(outputPlug)
+        outputPlug.affects.add(inputPlug)
+
+    @staticmethod
+    def getPlugAffects(plug):
+        affection = plug.affects
+        logger.debug(
+            "got plug affection:: plug > {0}, affected by > {1}".format(plug.name, [affect.name for affect in affection]))
+        return affection
 
     @property
     def plugs(self):
@@ -108,7 +121,7 @@ class BaseNode(object):
         """
         pass
 
-    def compute(self):
+    def compute(self, requestPlug=None):
         """Intended to be overridden
         :return: None
         """

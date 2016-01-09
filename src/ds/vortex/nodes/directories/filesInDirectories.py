@@ -13,16 +13,25 @@ class FilesInDirectoriesNode(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("directories", self), [], clean=True)
-        self.addPlug(plugs.InputPlug("fullPath", self), True, clean=True)
+        self.outputPlug_ = plugs.OutputPlug("output", self)
+        self.directoriesPlug_ = plugs.InputPlug("directories", self)
+        self.fullpathPlug_ = plugs.InputPlug("fullPath", self)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
+        self.addPlug(self.outputPlug_, clean=True)
+        self.addPlug(self.directoriesPlug_, clean=True)
+        self.addPlug(self.fullpathPlug_, clean=True)
+
+        self.plugAffects(self.directoriesPlug_, self.outputPlug_)
+        self.plugAffects(self.fullpathPlug_, self.outputPlug_)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if requestPlug != self.outputPlug_:
+            return None
         result = []
-        fullpath = self.getPlug("fullPath").value
+        fullpath = self.fullpathPlug_.value
 
-        for directory in self.getPlug("directories").value:
+        for directory in self.directoriesPlug_.value:
             directory = os.path.normpath(directory)
             if not os.path.exists(directory):
                 os.mkdir(directory)
@@ -32,12 +41,8 @@ class FilesInDirectoriesNode(baseNode.BaseNode):
                 continue
             result.extend([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))])
 
-        if not result:
-            return
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

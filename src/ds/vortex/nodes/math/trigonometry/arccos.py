@@ -12,7 +12,7 @@ class ArcCosNode(baseNode.BaseNode):
 
     def initialize(self):
         self.outputPlug_ = plugs.OutputPlug("output", self)
-        self.valuePlug_ = plugs.InputPlug("value", self, value=0)
+        self.valuePlug_ = plugs.InputPlug("value", self, value=float(0))
 
         self.addPlug(self.outputPlug_, clean=True)
         self.addPlug(self.valuePlug_, clean=True)
@@ -23,6 +23,7 @@ class ArcCosNode(baseNode.BaseNode):
         baseNode.BaseNode.compute(self, requestPlug=requestPlug)
         if requestPlug != self.outputPlug_:
             return None
+
         result = math.acos(self.valuePlug_.value)
 
         requestPlug.value = result

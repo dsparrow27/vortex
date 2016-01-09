@@ -8,6 +8,7 @@ from ds.vortex.nodes.math.basic import modulo
 from ds.vortex.nodes.math.basic import multiply
 from ds.vortex.nodes.math.basic import power
 from ds.vortex.nodes.math.basic import squareRoot
+from ds.vortex.nodes.math.basic import subtract
 
 
 class TestAbsoluteNode(unittest.TestCase):
@@ -98,6 +99,65 @@ class TestInvertNode(unittest.TestCase):
         inputPlug1.value = -855423
         self.node.compute(self.node.getPlug("output"))
         self.assertEquals(self.node.getPlug("output").value, 855423)
+
+
+class TestModuloByNode(unittest.TestCase):
+    def setUp(self):
+        self.node = modulo.ModuloNode("moduloBy")
+
+    def testCompute(self):
+        inputPlug = self.node.getPlug("value")
+        moduloByPlug = self.node.getPlug("moduloBy")
+        inputPlug.value = 7
+        moduloByPlug.value = 2
+        self.node.compute(self.node.getPlug("output"))
+        self.assertEquals(self.node.getPlug("output").value, 1)
+        moduloByPlug.value = 6
+        self.node.compute(self.node.getPlug("output"))
+        self.assertNotEquals(self.node.getPlug("output").value, 0)
+
+
+class TestPowerNode(unittest.TestCase):
+    def setUp(self):
+        self.node = power.PowerNode("power")
+
+    def testCompute(self):
+        value1Plug = self.node.getPlug("value1")
+        value2Plug = self.node.getPlug("value2")
+        value1Plug.value = 7
+        value2Plug.value = 2
+        self.node.compute(self.node.getPlug("output"))
+        self.assertEquals(self.node.getPlug("output").value, 49)
+        value2Plug.value = 0
+        self.node.compute(self.node.getPlug("output"))
+        self.assertEquals(self.node.getPlug("output").value, 1)
+
+
+class TestSquareRootNode(unittest.TestCase):
+    def setUp(self):
+        self.node = squareRoot.SquareRootNode("squareRoot")
+
+    def testCompute(self):
+        inputPlug = self.node.getPlug("value")
+        inputPlug.value = 7
+        self.node.compute(self.node.getPlug("output"))
+        self.assertEquals(self.node.getPlug("output").value, 2.6457513110645907)
+
+
+class TestSubtractNode(unittest.TestCase):
+    def setUp(self):
+        self.node = subtract.SubtractNode("subtract")
+
+    def testCompute(self):
+        inputPlug = self.node.getPlug("value")
+        subtractPlug = self.node.getPlug("subtract")
+        inputPlug.value = 7
+        subtractPlug.value = 2
+        self.node.compute(self.node.getPlug("output"))
+        self.assertEquals(self.node.getPlug("output").value, 5)
+        subtractPlug.value = 6.0
+        self.node.compute(self.node.getPlug("output"))
+        self.assertEquals(self.node.getPlug("output").value, 1.0)
 
 
 if __name__ == "__main__":

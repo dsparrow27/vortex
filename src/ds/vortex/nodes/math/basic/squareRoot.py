@@ -28,6 +28,7 @@ class SquareRootNode(baseNode.BaseNode):
 
         result = math.sqrt(self.valuePlug_.value)
 
+
         requestPlug.value = result
         requestPlug.dirty = False
 

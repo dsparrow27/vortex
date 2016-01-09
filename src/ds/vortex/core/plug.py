@@ -2,7 +2,6 @@ import inspect
 from ds.vortex.core import baseEdge
 from ds.vortex import customLogger as customLogger
 log = customLogger.getCustomLogger()
-print log
 
 
 class BasePlug(object):

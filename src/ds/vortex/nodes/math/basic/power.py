@@ -28,7 +28,7 @@ class PowerNode(baseNode.BaseNode):
         if requestPlug != self.outputPlug_:
             return None
 
-        result = self.value1Plug_.value % self.value2Plug_.value
+        result = self.value1Plug_.value ** self.value2Plug_.value
 
         requestPlug.value = result
         requestPlug.dirty = False

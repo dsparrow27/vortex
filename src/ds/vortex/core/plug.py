@@ -1,12 +1,17 @@
 import inspect
 from ds.vortex.core import baseEdge
 from ds.vortex import customLogger as customLogger
+from ds.vortex.core import vortexEvent
 log = customLogger.getCustomLogger()
 
 
 class BasePlug(object):
     """Base Plug class , inputs and output plug is derived from this class
     """
+    dirtyStateChange = vortexEvent.VortexSignal()
+    valueChanged = vortexEvent.VortexSignal()
+    connectionAdded = vortexEvent.VortexSignal()
+    connectionRemoved = vortexEvent.VortexSignal()
 
     def __init__(self, name, node=None, value=None):
         """
@@ -45,6 +50,7 @@ class BasePlug(object):
         :return: None
         """
         self._dirty = value
+        self.dirtyStateChange.emit(value)
 
     @property
     def value(self):
@@ -62,6 +68,7 @@ class BasePlug(object):
         """
         self._value = value
         self.dirty = True
+        self.valueChanged.emit(value)
 
     @property
     def node(self):
@@ -125,14 +132,16 @@ class BasePlug(object):
         for index, edge in enumerate(self._connections):
             if edge.isConnected(self, plug):
                 edge.delete()
+                self.connectionRemoved.emit(edge)
 
-    def connect(self, plug):
+    def connect(self, plug, edge=None):
         """Connects two attributes together if self isInput type then if there's a current connections then this gets
         replaced.
         :param plug: BasePlug, InputPlug or Outputplug instance
         :return: edge
         """
-        log.debug("connecting plugs::".format(plug.name, self.name))
+        log.debug("connected plugs::".format(plug.name, self.name))
+        self.connectionAdded.emit(plug, edge)
 
     def serialize(self):
         """Serializes the plug as a dict
@@ -217,7 +226,7 @@ class InputPlug(BasePlug):
             log.debug("plug has no node parent::{}".format(self.name))
 
         self.dirty = True
-
+        BasePlug.connect(plug, edge=edge)
         return edge
 
 
@@ -239,3 +248,4 @@ class OutputPlug(BasePlug):
                 edge = baseEdge.Edge(self.name + "_" + plug.name, input=plug, output=self)
             self._connections.append(edge)
             plug.connect(self)
+            BasePlug.connect(plug, edge=edge)

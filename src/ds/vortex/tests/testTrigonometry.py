@@ -15,6 +15,7 @@ class TestMathArcCosNode(unittest.TestCase):
         self.output = self.node.getPlug("output")
 
     def testArcCos(self):
+        self.node.getPlug("value").value = None
         self.assertRaises(TypeError, self.node.compute, self.output)
         self.node.getPlug("value").value = -1
         self.node.compute(self.node.getPlug("output"))
@@ -33,6 +34,7 @@ class TestMathArcSinNode(unittest.TestCase):
         self.output = self.node.getPlug("output")
 
     def testArcSin(self):
+        self.node.getPlug("value").value = None
         self.assertRaises(TypeError, self.node.compute, self.output)
         self.node.getPlug("value").value = -1
         self.node.compute(self.node.getPlug("output"))
@@ -51,6 +53,7 @@ class TestMathArcTanNode(unittest.TestCase):
         self.output = self.node.getPlug("output")
 
     def testArcTan(self):
+        self.node.getPlug("value").value = None
         self.assertRaises(TypeError, self.node.compute, self.output)
         self.node.getPlug("value").value = -1
         self.node.compute(self.node.getPlug("output"))
@@ -69,6 +72,7 @@ class TestMathCosNode(unittest.TestCase):
         self.output = self.node.getPlug("output")
 
     def testCos(self):
+        self.node.getPlug("value").value = None
         self.assertRaises(TypeError, self.node.compute, self.output)
         self.node.getPlug("value").value = -math.pi / 2
         self.node.compute(self.node.getPlug("output"))
@@ -90,6 +94,7 @@ class TestMathSinNode(unittest.TestCase):
         self.output = self.node.getPlug("output")
 
     def testSin(self):
+        self.node.getPlug("value").value = None
         self.assertRaises(TypeError, self.node.compute, self.output)
         self.node.getPlug("value").value = 0
         self.node.compute(self.node.getPlug("output"))
@@ -108,6 +113,7 @@ class TestMathTanNode(unittest.TestCase):
         self.output = self.node.getPlug("output")
 
     def testTan(self):
+        self.node.getPlug("value").value = None
         self.assertRaises(TypeError, self.node.compute, self.output)
         self.node.getPlug("value").value = 0
         self.node.compute(self.node.getPlug("output"))

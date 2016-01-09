@@ -37,7 +37,11 @@ class TestGetDict(unittest.TestCase):
         self.assertIsNone(self.node.compute(self.output))
 
     def testGetDictFromKey(self):
-        pass
+        self.value.value = {"test1": [354],
+                            "touch": 86}
+        self.keyPlug.value = "touch"
+        self.assertEquals(self.node.compute(self.output), 86)
+        self.assertEquals(self.output.value, 86)
 
 
 class TestRemoveDict(unittest.TestCase):

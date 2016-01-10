@@ -140,9 +140,7 @@ class TestSquareRootNode(unittest.TestCase):
     def testCompute(self):
         inputPlug = self.node.getPlug("value")
         inputPlug.value = -7
-        with self.assertRaises(ValueError):
-            self.node.compute(self.node.getPlug("output"))
-        # self.assertRaises(ValueError, )
+        self.assertRaises(ValueError, self.node.compute, self.node.getPlug("output"))
         self.assertNotEquals(self.node.getPlug("output").value, 2.6457513110645907)
         inputPlug.value = 7
         self.node.compute(self.node.getPlug("output"))

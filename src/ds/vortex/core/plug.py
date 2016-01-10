@@ -9,9 +9,6 @@ log = customLogger.getCustomLogger()
 class BasePlug(object):
     """Base Plug class , inputs and output plug is derived from this class
     """
-    valueChanged = vortexEvent.VortexSignal()
-    connectionAdded = vortexEvent.VortexSignal()
-    connectionRemoved = vortexEvent.VortexSignal()
 
     def __init__(self, name, node=None, value=None):
         """
@@ -25,7 +22,12 @@ class BasePlug(object):
         self._connections = []
         self._dirty = False  # false is clean
         self._value = value
+        self.computed = 0
         self.affects = set()
+        self.dirtyStateChanged = vortexEvent.VortexSignal()
+        self.valueChanged = vortexEvent.VortexSignal()
+        self.connectionAdded = vortexEvent.VortexSignal()
+        self.connectionRemoved = vortexEvent.VortexSignal()
 
     def __repr__(self):
         return "{}{}".format(self.__class__, self.__dict__)
@@ -66,8 +68,6 @@ class BasePlug(object):
         :return: None
         """
         self._value = value
-        self.dirty = True
-        self.valueChanged.emit(value)
 
     @property
     def node(self):
@@ -151,7 +151,6 @@ class BasePlug(object):
                     edge.input.dirty = True
                     # if we haven't visited this node before then call setDownStreamDirty on it
                     if edge not in visitedNodes:
-                        edge.input.setDownStreamDirty()
                         visitedNodes.add(edge)
                         continue
             plug.dirty = True
@@ -217,10 +216,19 @@ class InputPlug(BasePlug):
         # pass the value to all connected plugs if it is connected
         self._value = value
         self.dirty = True
-        # self._node.setDownStreamDirty(self)
-        self.setDownStreamDirty()
 
-    def connect(self, plug):
+    @property
+    def dirty(self):
+        return self._dirty
+
+    @dirty.setter
+    def dirty(self, value):
+        self._dirty = value
+        self.computed = 0
+        self.setDownStreamDirty()
+        self.dirtyStateChanged.emit(self, value)
+
+    def connect(self, plug, edge=None):
         """creates a connection between to plugs, a input can only have one input so current connections is cleared
         before creating the new connection
         :param plug:
@@ -234,19 +242,12 @@ class InputPlug(BasePlug):
         # inputs can only have a single connection
         self._connections = [edge]
         plug.connect(self)
-        try:
-            self.setDownStreamDirty()
-        except AttributeError:
-            log.debug("plug has no node parent::{}".format(self.name))
-
         self.dirty = True
         BasePlug.connect(self, plug, edge=edge)
         return edge
 
 
 class OutputPlug(BasePlug):
-    dirtyStateChanged = vortexEvent.VortexSignal()
-
     def __init__(self, name, node=None, value=None):
         """
         :param name: str, the name for the plug
@@ -271,9 +272,11 @@ class OutputPlug(BasePlug):
         :return: None
         """
         self._dirty = value
+        if value:
+            self.computed = 0
         self.dirtyStateChanged.emit(self, value)
 
-    def connect(self, plug):
+    def connect(self, plug, edge=None):
         if not self.isConnectedTo(plug):
             edge = plug.getConnection(self)
             if not edge:
@@ -281,3 +284,21 @@ class OutputPlug(BasePlug):
             self._connections.append(edge)
             plug.connect(self)
             BasePlug.connect(self, plug, edge=edge)
+
+    def request(self):
+        for inputPlug in self.affects:
+            if not inputPlug.dirty:
+                continue
+            if not inputPlug.isConnected():
+                # mark clean
+                inputPlug.dirty = False
+                continue
+            connectedEdge = inputPlug.connections[0]
+            connectedEdge.output.request()
+            inputPlug._value = connectedEdge.output.value
+            inputPlug.dirty = False
+
+        if not self.computed:
+            log.debug("computing, %s, %s" % (self.node.name, self.name))
+            self._node.compute(requestPlug=self)
+            self.computed = 1

@@ -24,7 +24,6 @@ class ScalarNode(baseNode.BaseNode):
         if requestPlug != self.outputPlug_:
             return
         result = float(self.valuePlug_.value)
-
         requestPlug.value = result
         requestPlug.dirty = False
         return result

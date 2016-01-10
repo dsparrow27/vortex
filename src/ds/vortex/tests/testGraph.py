@@ -90,43 +90,51 @@ class TestGraphDirty(unittest.TestCase):
 
 
 class TestLiveGraphMode(unittest.TestCase):
+    def setUp(self):
+        self.graph = graph.Graph("liveGraph")
 
     def testLiveGraphTriggerEvaluation(self):
-        testGraph = graph.Graph("liveGraph")
         self.addNode = add.AddNode("addNode")
-        self.scalar1 = scalar.ScalarNode("scalar2")
-        self.scalar2 = scalar.ScalarNode("scalar1")
+        self.scalar1 = scalar.ScalarNode("scalar1")
+        self.scalar2 = scalar.ScalarNode("scalar2")
         self.scalar1.getPlug("output").connect(self.addNode.getPlug("value1"))
         self.scalar2.getPlug("output").connect(self.addNode.getPlug("value2"))
         livePlug = self.addNode.getPlug("output")
+        self.graph.createLivePlug(livePlug)
+        self.assertIsNone(livePlug.value)
+        self.scalar1.getPlug("value").value = 10
+        self.assertEquals(livePlug.value, 10)
+        self.scalar2.getPlug("value").value = 10
+        self.assertEquals(livePlug.value, 20)
+        self.graph.removeLivePlug(livePlug)
+        self.assertFalse(self.graph.liveMode)
+        self.assertEquals(len(livePlug.dirtyStateChanged), 0)
+        self.assertFalse(livePlug.dirty)
+        self.scalar2.getPlug("value").value = 5
+        self.assertEquals(livePlug.value, 20)
+        self.graph.requestEvaluate(livePlug)
 
-        testGraph.createLivePlug(livePlug)
-        # self.assertIsNone(livePlug.value)
-        # self.scalar1.getPlug("value").value = 10
-        # self.assertEquals(livePlug.value, 10)
-        # self.scalar2.getPlug("value").value = 10
-        # self.assertEquals(livePlug.value, 20)
+
+class TestSerialize(unittest.TestCase):
+    def setUp(self):
+        self.graph = graph.Graph("serialGraph")
+
+    def testEmptyGraph(self):
+        savedGraph = self.graph.serializeGraph()
+        self.newGraph = graph.Graph("emptyGraph")
+        self.newGraph.loadGraph(savedGraph)
+        self.assertEquals(len(self.graph), len(self.newGraph))
+
+    def testSerializeNodeToGraph(self):
+        self.graph.addNode(baseNode.BaseNode("testNode"))
+        self.graph.addNode(baseNode.BaseNode("testNode2"))
+        savedGraph = self.graph.serializeGraph()
+        self.newGraph = graph.Graph.loadGraph(savedGraph)
+        self.assertEquals(len(self.graph.nodes), len(self.newGraph.nodes))
+        self.assertEquals(self.graph._name, self.newGraph._name)
 
 
-# class TestSerialize(unittest.TestCase):
-#     def setUp(self):
-#         self.graph = graph.Graph("serialGraph")
-#
-#     def testEmptyGraph(self):
-#         savedGraph = self.graph.serializeGraph()
-#         self.newGraph = graph.Graph("emptyGraph")
-#         self.newGraph.loadGraph(savedGraph)
-#         self.assertEquals(len(self.graph), len(self.newGraph))
-#
-#     def testSerializeNodeToGraph(self):
-#         self.graph.addNode(baseNode.BaseNode("testNode"))
-#         self.graph.addNode(baseNode.BaseNode("testNode2"))
-#         savedGraph = self.graph.serializeGraph()
-#         self.newGraph = graph.Graph.loadGraph(savedGraph)
-#         self.assertEquals(len(self.graph.nodes), len(self.newGraph.nodes))
-#         self.assertEquals(self.graph._name, self.newGraph._name)
-#
-#     def testSerializeNodePlugsToGraph(self):
+# def testSerializeNodePlugsToGraph(self):
 #         node = baseNode.BaseNode("testNode")
 #         node2 = baseNode.BaseNode("testNode2")
 #         node.addPlug(plugs.InputPlug("testInputPlug", node=node))

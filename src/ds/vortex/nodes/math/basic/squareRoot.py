@@ -25,9 +25,7 @@ class SquareRootNode(baseNode.BaseNode):
         baseNode.BaseNode.compute(self, requestPlug=requestPlug)
         if requestPlug != self.outputPlug_:
             return None
-
         result = math.sqrt(self.valuePlug_.value)
-
 
         requestPlug.value = result
         requestPlug.dirty = False

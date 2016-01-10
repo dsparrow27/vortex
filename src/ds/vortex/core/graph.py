@@ -3,6 +3,8 @@ from collections import OrderedDict
 import baseEdge
 from ds.vortex import customLogger
 from ds.vortex.core import vortexEvent
+from ds.vortex.core import plug as basePlug
+
 logger = customLogger.getCustomLogger()
 
 
@@ -12,6 +14,7 @@ class Graph(object):
     """
     addedNode = vortexEvent.VortexSignal()
     removedNode = vortexEvent.VortexSignal()
+
     # requestedEvaluation = vortexEvent.VortexSignal()
 
     def __init__(self, name=""):
@@ -121,10 +124,13 @@ class Graph(object):
         """Connects the plug dirty state changed signal to evaluate the graph.
         :param plug:
         """
-
         plug.dirtyStateChanged.connect(self._livePlugDirtySignalCheck)
         if not self.liveMode:
             self.liveMode = True
+
+    def removeLivePlug(self, plug):
+        plug.dirtyStateChanged.removeEvent(self._livePlugDirtySignalCheck)
+        self.liveMode = False
 
     def _livePlugDirtySignalCheck(self, plug, dirtyState):
         """Private use only, Calls requestEvaluation for a plug if the dirtyState is True and live mode is on
@@ -132,8 +138,7 @@ class Graph(object):
         :param dirtyState: bool, the state of the dirty flag for the plug
         :return: None
         """
-        if self.liveMode and dirtyState:
-            # print plug.dirty, dirtyState, self.liveMode, plug.node.name, plug.name
+        if self.liveMode:
             self.requestEvaluate(plug)
             logger.debug("Triggering request Evaluation via live mode")
 
@@ -146,24 +151,7 @@ class Graph(object):
             return
         if not outputPlug.dirty:
             return outputPlug.value
-
-        node = outputPlug.node
-        for plug in node.getPlugAffects(outputPlug):
-            if plug.dirty:
-                if not plug.isConnected():
-                    # mark clean
-                    plug.dirty = False
-                    continue
-                connectedEdge = plug.connections[0]
-                if connectedEdge.output.dirty:
-                    self.requestEvaluate(connectedEdge.output)
-                print plug.value, plug.node.name, connectedEdge.output.value, ">>>>"
-                plug.value = connectedEdge.output.value
-                plug.dirty = False
-
-        node.compute(requestPlug=outputPlug)
-        logger.debug("computed output is::{0}, nodeName::{1}, plug::{2}".format(outputPlug.value, node.name,
-                                                                                outputPlug.name))
+        outputPlug.request()
 
     def serializeGraph(self):
         logger.debug("serializing graph")

@@ -3,7 +3,7 @@ import unittest
 
 def createTestSuites():
     tests = ["testEdge", "testGraph", "testBaseNodes", "testBasicMathNodes", "testPlug", "testTrigonometry",
-             "testConversion", "testDict", "testString"]
+             "testConversion", "testDict", "testString", "testConstants"]
 
     suites = [unittest.defaultTestLoader.loadTestsFromName("ds.vortex.tests." + name) for name in tests]
     testSuite = unittest.TestSuite(suites)

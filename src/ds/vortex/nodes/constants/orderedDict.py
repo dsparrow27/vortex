@@ -14,7 +14,7 @@ class DictNode(baseNode.BaseNode):
     def initialize(self):
         baseNode.BaseNode.initialize(self)
         self.outputPlug_ = plugs.OutputPlug("output", self)
-        self.valuePlug_ = plugs.InputPlug("value", self, value=1)
+        self.valuePlug_ = plugs.InputPlug("value", self, value={})
 
         self.addPlug(self.outputPlug_, clean=True)
         self.addPlug(self.valuePlug_, clean=True)

@@ -19,7 +19,7 @@ class PiNode(baseNode.BaseNode):
         baseNode.BaseNode.compute(self, requestPlug=requestPlug)
         if requestPlug != self.outputPlug_:
             return None
-        result = math.pi()
+        result = math.pi
 
         requestPlug.value = result
         requestPlug.dirty = False

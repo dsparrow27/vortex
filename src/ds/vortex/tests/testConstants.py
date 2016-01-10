@@ -1,6 +1,7 @@
-import unittest
 import math
+import unittest
 from collections import OrderedDict
+
 from ds.vortex.nodes.constants import boolean
 from ds.vortex.nodes.constants import dict as dictNode
 from ds.vortex.nodes.constants import halfPi

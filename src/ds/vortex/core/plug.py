@@ -2,13 +2,13 @@ import inspect
 from ds.vortex.core import baseEdge
 from ds.vortex import customLogger as customLogger
 from ds.vortex.core import vortexEvent
+
 log = customLogger.getCustomLogger()
 
 
 class BasePlug(object):
     """Base Plug class , inputs and output plug is derived from this class
     """
-    dirtyStateChange = vortexEvent.VortexSignal()
     valueChanged = vortexEvent.VortexSignal()
     connectionAdded = vortexEvent.VortexSignal()
     connectionRemoved = vortexEvent.VortexSignal()
@@ -50,7 +50,6 @@ class BasePlug(object):
         :return: None
         """
         self._dirty = value
-        self.dirtyStateChange.emit(value)
 
     @property
     def value(self):
@@ -143,6 +142,20 @@ class BasePlug(object):
         log.debug("connected plugs::".format(plug.name, self.name))
         self.connectionAdded.emit(plug, edge)
 
+    def setDownStreamDirty(self):
+        visitedNodes = set()
+        for plug in self.affects:
+            # walk if connected
+            if plug.isConnected():
+                for edge in plug.connections:
+                    edge.input.dirty = True
+                    # if we haven't visited this node before then call setDownStreamDirty on it
+                    if edge not in visitedNodes:
+                        edge.input.setDownStreamDirty()
+                        visitedNodes.add(edge)
+                        continue
+            plug.dirty = True
+
     def serialize(self):
         """Serializes the plug as a dict
         :return: dict,
@@ -204,7 +217,8 @@ class InputPlug(BasePlug):
         # pass the value to all connected plugs if it is connected
         self._value = value
         self.dirty = True
-        self._node.setDownStreamDirty(self)
+        # self._node.setDownStreamDirty(self)
+        self.setDownStreamDirty()
 
     def connect(self, plug):
         """creates a connection between to plugs, a input can only have one input so current connections is cleared
@@ -221,7 +235,7 @@ class InputPlug(BasePlug):
         self._connections = [edge]
         plug.connect(self)
         try:
-            self.node.setDownStreamDirty(self)
+            self.setDownStreamDirty()
         except AttributeError:
             log.debug("plug has no node parent::{}".format(self.name))
 
@@ -231,6 +245,8 @@ class InputPlug(BasePlug):
 
 
 class OutputPlug(BasePlug):
+    dirtyStateChanged = vortexEvent.VortexSignal()
+
     def __init__(self, name, node=None, value=None):
         """
         :param name: str, the name for the plug
@@ -240,6 +256,22 @@ class OutputPlug(BasePlug):
         """
         BasePlug.__init__(self, name, node, value)
         self._io = "output"
+
+    @property
+    def dirty(self):
+        """gets the dirty state of the plug
+        :return: bool
+        """
+        return self._dirty
+
+    @dirty.setter
+    def dirty(self, value):
+        """sets the dirty state of the plug
+        :param value: bool, the dirty state(False==clean, True==dirty)
+        :return: None
+        """
+        self._dirty = value
+        self.dirtyStateChanged.emit(self, value)
 
     def connect(self, plug):
         if not self.isConnectedTo(plug):

@@ -38,6 +38,11 @@ class VortexSignal(object):
         self.events.add(func)
         logger.debug("Adding event funcCall:: %s" % func)
 
+    def hasEvents(self):
+        if not self.events:
+            return False
+        return True
+
     def emit(self, *args, **kwargs):
         """Triggers all the events that have been added, event(*args, **kwargs)
         :param args: arguments to pass to the connected events(functions)

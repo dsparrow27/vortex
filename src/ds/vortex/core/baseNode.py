@@ -86,24 +86,6 @@ class BaseNode(object):
         del self._plugs[plug.name]
         self.deletedPlug.emit(plug)
 
-    def setDownStreamDirty(self, inputPlug):
-        """Sets all the output plugs on the node to dirty , if the plug is connected then walk the connected plugs
-        setting the dirty flag on each plug as we go
-        """
-        visitedNodes = []
-        for plug in inputPlug.affects:
-            # walk if connected
-            if plug.isConnected():
-                for edge in plug.connections:
-                    edge.input.dirty = True
-                    node = edge.input.node
-                    # if we haven't visited this node before then call setDownStreamDirty on it
-                    if node not in visitedNodes:
-                        node.setDownStreamDirty(inputPlug=edge.input)
-                        visitedNodes.append(node)
-                        continue
-            plug.dirty = True
-
     def inputs(self):
         """Finds and returns all the inputs for self
         :return: list(Plug)

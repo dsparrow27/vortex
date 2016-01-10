@@ -41,6 +41,10 @@ class BaseNode(object):
 
     @staticmethod
     def plugAffects(inputPlug, outputPlug):
+        """Add a link between to plugs on the same node, gets added to affects variable
+        :param inputPlug: inputPlug instance
+        :param outputPlug: outputPlug instance
+        """
         logger.debug(
             "Setting plug affection:: inputPlug > {0}, outputPlug > {1}".format(inputPlug.name, outputPlug.name))
         inputPlug.affects.add(outputPlug)
@@ -48,6 +52,10 @@ class BaseNode(object):
 
     @staticmethod
     def getPlugAffects(plug):
+        """Return the affect set for the plug
+        :param plug: plug instance
+        :return: set()
+        """
         affection = plug.affects
         logger.debug(
             "got plug affection:: plug > {0}, affected by > {1}".format(plug.name,

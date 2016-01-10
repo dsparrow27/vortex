@@ -106,7 +106,7 @@ class TestLiveGraphMode(unittest.TestCase):
         self.assertEquals(livePlug.value, 10)
         self.scalar2.getPlug("value").value = 10
         self.assertEquals(livePlug.value, 20)
-        self.graph.removeLivePlug(livePlug)
+        self.graph.removeLivePlug(livePlug, self.graph._livePlugDirtySignalCheck)
         self.assertFalse(self.graph.liveMode)
         self.assertEquals(len(livePlug.dirtyStateChanged), 0)
         self.assertFalse(livePlug.dirty)

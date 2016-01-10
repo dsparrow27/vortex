@@ -15,8 +15,6 @@ class Graph(object):
     addedNode = vortexEvent.VortexSignal()
     removedNode = vortexEvent.VortexSignal()
 
-    # requestedEvaluation = vortexEvent.VortexSignal()
-
     def __init__(self, name=""):
         """
         :param name: str, the name of the graph
@@ -128,8 +126,12 @@ class Graph(object):
         if not self.liveMode:
             self.liveMode = True
 
-    def removeLivePlug(self, plug):
-        plug.dirtyStateChanged.removeEvent(self._livePlugDirtySignalCheck)
+    def removeLivePlug(self, plug, event):
+        """Removes the event from th plug.dirtyStateChanged
+        :param plug: plug instance, the plug instance to disconnect
+        :param event: function instance, the function that gets called to be removed
+        """
+        plug.dirtyStateChanged.removeEvent(event)
         self.liveMode = False
 
     def _livePlugDirtySignalCheck(self, plug, dirtyState):
@@ -192,8 +194,8 @@ class Graph(object):
             inputPlug = graph.getNode(edge["input"][1]).getPlug(edge["input"][0])
             outputPlug = graph.getNode(edge["output"][1]).getPlug(edge["output"][0])
             newEdge = baseEdge.Edge(name=edge["name"], input=inputPlug, output=outputPlug)
-            inputPlug._connections = [newEdge]
-            outputPlug._connections.append(newEdge)
+            inputPlug.connections = [newEdge]
+            outputPlug.connections.append(newEdge)
 
         return graph
 

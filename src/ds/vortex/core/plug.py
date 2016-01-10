@@ -9,6 +9,10 @@ log = customLogger.getCustomLogger()
 class BasePlug(object):
     """Base Plug class , inputs and output plug is derived from this class
     """
+    dirtyStateChanged = vortexEvent.VortexSignal()  # emits plug instance, dirty state (bool)
+    valueChanged = vortexEvent.VortexSignal()  # emits plug instance, plug value
+    connectionAdded = vortexEvent.VortexSignal()  # emits plug instance, edge instance
+    connectionRemoved = vortexEvent.VortexSignal()  # emits edge instance
 
     def __init__(self, name, node=None, value=None):
         """
@@ -24,10 +28,6 @@ class BasePlug(object):
         self._value = value
         self.computed = 0
         self.affects = set()
-        self.dirtyStateChanged = vortexEvent.VortexSignal()
-        self.valueChanged = vortexEvent.VortexSignal()
-        self.connectionAdded = vortexEvent.VortexSignal()
-        self.connectionRemoved = vortexEvent.VortexSignal()
 
     def __repr__(self):
         return "{}{}".format(self.__class__, self.__dict__)
@@ -52,6 +52,7 @@ class BasePlug(object):
         :return: None
         """
         self._dirty = value
+        self.dirtyStateChanged.emit(self, value)
 
     @property
     def value(self):
@@ -68,6 +69,7 @@ class BasePlug(object):
         :return: None
         """
         self._value = value
+        self.valueChanged.emit(self, value)
 
     @property
     def node(self):
@@ -216,6 +218,7 @@ class InputPlug(BasePlug):
         # pass the value to all connected plugs if it is connected
         self._value = value
         self.dirty = True
+        self.valueChanged.emit(self, value)
 
     @property
     def dirty(self):

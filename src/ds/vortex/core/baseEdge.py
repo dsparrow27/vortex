@@ -7,8 +7,8 @@ logger = customLogger.getCustomLogger()
 class Edge(object):
     """Base class for graph edges , a simple class that holds the connection values of plugs,
     """
-    deleted = vortexEvent.VortexSignal()
-    connected = vortexEvent.VortexSignal()
+    deleted = vortexEvent.VortexSignal() # emit nothing
+    connected = vortexEvent.VortexSignal() # emit inputPlug instance, outputPlug instance
 
     def __init__(self, name, input=None, output=None, arbitraryData=None):
         """

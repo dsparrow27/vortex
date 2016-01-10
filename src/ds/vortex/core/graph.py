@@ -2,7 +2,7 @@ import inspect
 from collections import OrderedDict
 import baseEdge
 from ds.vortex import customLogger
-
+from ds.vortex.core import vortexEvent
 logger = customLogger.getCustomLogger()
 
 
@@ -10,6 +10,9 @@ class Graph(object):
     """This graph class stores the nodes and will evaluate the graph on request, to request a compute you will first need
     the output plug instance and then call Graph.requestEvaluate(outputPlug)
     """
+    addedNode = vortexEvent.VortexSignal()
+    removedNode = vortexEvent.VortexSignal()
+    requestedEvaluation = vortexEvent.VortexSignal()
 
     def __init__(self, name="", graph=None):
         """
@@ -46,6 +49,7 @@ class Graph(object):
             plug = node.getPlug(plugName)
             if plug.isInput():
                 plug.value = plugValue
+        self.addedNode.emit(node)
         return node
 
     @property
@@ -71,6 +75,7 @@ class Graph(object):
         :param node: the node instance to delete
         """
         del self._nodes[node.name]
+        self.removedNode.emit(node)
 
     def getNode(self, nodeName):
         """Returns a node based on the name or empty list
@@ -133,8 +138,8 @@ class Graph(object):
                 plug.value = connectedEdge.output.value
                 plug.dirty = False
 
+        self.requestedEvaluation.emit(outputPlug)
         node.compute(requestPlug=outputPlug)
-
         logger.debug("computed output is::{0}, nodeName::{1}, plug::{2}".format(outputPlug.value, node.name,
                                                                                 outputPlug.name))
 
@@ -165,7 +170,7 @@ class Graph(object):
             try:
                 module = __import__(modulePath, globals(), locals(), [node.get("moduleName")], -1)
             except ImportError, er:
-                customLogger.error("""importing {0} Failed! , have you typed the right name?,
+                logger.error("""importing {0} Failed! , have you typed the right name?,
                     check nodes package.""".format(modulePath))
                 raise er
             newNode = module.getNode()(name=node.get("name"))

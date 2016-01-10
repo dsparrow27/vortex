@@ -1,12 +1,14 @@
 import inspect
 from ds.vortex import customLogger as customLogger
-
+from ds.vortex.core import vortexEvent
 logger = customLogger.getCustomLogger()
 
 
 class Edge(object):
     """Base class for graph edges , a simple class that holds the connection values of plugs,
     """
+    deleted = vortexEvent.VortexSignal()
+    connected = vortexEvent.VortexSignal()
 
     def __init__(self, name, input=None, output=None, arbitraryData=None):
         """
@@ -27,14 +29,15 @@ class Edge(object):
         return isinstance(other, Edge) and self.input == other.input and self.output == other.output
 
     def delete(self):
-        if 0 in range(len(self.input.connections)):
-            self.input._connections = []
+        self.input._connections = []
         for index, connection in enumerate(self.output.connections):
             if connection == self:
                 outputConnections = self.output.connections
                 if index in range(len(outputConnections)):
                     del outputConnections[index]
+
                 break
+        self.deleted.emit()
 
     def isConnected(self, plug1, plug2):
         return plug1 == self.input and \
@@ -48,6 +51,7 @@ class Edge(object):
         input._connection = [self]
         if self not in output.connections:
             output.connections.append(self)
+        self.connected.emit(input, output)
 
     def serialize(self):
         """Returns a dict of the input, output and the arbitraryData

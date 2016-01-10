@@ -4,7 +4,7 @@ import os
 import sys
 
 
-def getCustomLogger(name='vortex', loglevel='INFO'):
+def getCustomLogger(name='vortex', loglevel='DEBUG'):
     log = logging.getLogger(name)
 
     if log.handlers:

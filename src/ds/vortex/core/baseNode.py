@@ -2,12 +2,18 @@ from collections import OrderedDict
 from ds.vortex import customLogger as cusLogger
 import inspect
 
+from ds.vortex.core import vortexEvent
+
 logger = cusLogger.getCustomLogger()
 
 
 class BaseNode(object):
     """Core node class that stores the all the plugs, initialize and compute methods must be overridden in custom nodes
     """
+    addedPlug = vortexEvent.VortexSignal(),  # emits the plug added
+    deletedPlug = vortexEvent.VortexSignal()  # emits the deleted plug
+    computed = vortexEvent.VortexSignal()  # emits the node instance computed and the outputPlug
+    initializing = vortexEvent.VortexSignal()  # emits the node instance
 
     def __init__(self, name):
         """
@@ -35,7 +41,8 @@ class BaseNode(object):
 
     @staticmethod
     def plugAffects(inputPlug, outputPlug):
-        logger.debug("Setting plug affection:: inputPlug > {0}, outputPlug > {1}".format(inputPlug.name, outputPlug.name))
+        logger.debug(
+            "Setting plug affection:: inputPlug > {0}, outputPlug > {1}".format(inputPlug.name, outputPlug.name))
         inputPlug.affects.add(outputPlug)
         outputPlug.affects.add(inputPlug)
 
@@ -43,7 +50,8 @@ class BaseNode(object):
     def getPlugAffects(plug):
         affection = plug.affects
         logger.debug(
-            "got plug affection:: plug > {0}, affected by > {1}".format(plug.name, [affect.name for affect in affection]))
+            "got plug affection:: plug > {0}, affected by > {1}".format(plug.name,
+                                                                        [affect.name for affect in affection]))
         return affection
 
     @property
@@ -76,6 +84,7 @@ class BaseNode(object):
         :param plug: the plug instance to delete
         """
         del self._plugs[plug.name]
+        self.deletedPlug.emit(plug)
 
     def setDownStreamDirty(self, inputPlug):
         """Sets all the output plugs on the node to dirty , if the plug is connected then walk the connected plugs
@@ -119,13 +128,16 @@ class BaseNode(object):
         """Intended to be overridden, this method is for cresting plugs, for the node before this node gets computed for the first time
         :return: None
         """
-        pass
+        self.initializing.emit(self)
 
-    def compute(self, requestPlug=None):
-        """Intended to be overridden
+    def compute(self, requestPlug):
+        """Intended to be overloaded, main compute method for a node instance, this must return a result
+        :param requestPlug: the output plug to compute, this must be passed to the overloaded
         :return: None
         """
         logger.debug("Computing {}".format(self.name))
+        self.computed.emit(self, requestPlug)
+        return None
 
     def serialize(self):
         """Returns a dict of the nodes data

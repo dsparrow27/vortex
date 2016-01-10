@@ -226,7 +226,7 @@ class InputPlug(BasePlug):
             log.debug("plug has no node parent::{}".format(self.name))
 
         self.dirty = True
-        BasePlug.connect(plug, edge=edge)
+        BasePlug.connect(self, plug, edge=edge)
         return edge
 
 
@@ -248,4 +248,4 @@ class OutputPlug(BasePlug):
                 edge = baseEdge.Edge(self.name + "_" + plug.name, input=plug, output=self)
             self._connections.append(edge)
             plug.connect(self)
-            BasePlug.connect(plug, edge=edge)
+            BasePlug.connect(self, plug, edge=edge)

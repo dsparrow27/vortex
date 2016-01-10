@@ -140,7 +140,7 @@ class Graph(object):
         :param dirtyState: bool, the state of the dirty flag for the plug
         :return: None
         """
-        if self.liveMode:
+        if self.liveMode and dirtyState:
             self.requestEvaluate(plug)
             logger.debug("Triggering request Evaluation via live mode")
 

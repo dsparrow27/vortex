@@ -12,7 +12,7 @@ class DictNode(baseNode.BaseNode):
     def initialize(self):
         baseNode.BaseNode.initialize(self)
         self.outputPlug_ = plugs.OutputPlug("output", self)
-        self.valuePlug_ = plugs.InputPlug("value", self, value=1)
+        self.valuePlug_ = plugs.InputPlug("value", self, value={})
 
         self.addPlug(self.outputPlug_, clean=True)
         self.addPlug(self.valuePlug_, clean=True)
@@ -23,7 +23,7 @@ class DictNode(baseNode.BaseNode):
         baseNode.BaseNode.compute(self, requestPlug=requestPlug)
         if requestPlug != self.outputPlug_:
             return None
-        result = bool(self.valuePlug_.value)
+        result = dict(self.valuePlug_.value)
 
         requestPlug.value = result
         requestPlug.dirty = False

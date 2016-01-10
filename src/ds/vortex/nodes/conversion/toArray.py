@@ -11,16 +11,20 @@ class ToArray(baseNode.BaseNode):
 
     def initialize(self):
         baseNode.BaseNode.initialize(self)
-        self.addPlug(plugs.OutputPlug("output", self), clean=True)
-        self.addPlug(plugs.InputPlug("value", self), [], clean=True)
+        self.output = plugs.OutputPlug("output", self)
+        self.valuePlug_ = plugs.InputPlug("value", self, value=[])
+        self.addPlug(self.output, clean=True)
+        self.addPlug(self.valuePlug_, clean=True)
 
-    def compute(self):
-        baseNode.BaseNode.compute(self)
-        result = (self.getPlug("value").value)
-        output = self.getPlug("output")
-        if output is not None:
-            output.value = result
-        output.dirty = False
+        self.plugAffects(self.valuePlug_, self.output)
+
+    def compute(self, requestPlug):
+        baseNode.BaseNode.compute(self, requestPlug=requestPlug)
+        if not requestPlug == self.output:
+            return None
+        result = [self.valuePlug_.value]
+        requestPlug.value = result
+        requestPlug.dirty = False
         return result
 
 

@@ -11,6 +11,7 @@ class BasePlug(object):
     """
     dirtyStateChanged = vortexEvent.VortexSignal()  # emits plug instance, dirty state (bool)
     valueChanged = vortexEvent.VortexSignal()  # emits plug instance, plug value
+    valueRequested = vortexEvent.VortexSignal()  # emits plug instance, plug value
     connectionAdded = vortexEvent.VortexSignal()  # emits plug instance, edge instance
     connectionRemoved = vortexEvent.VortexSignal()  # emits edge instance
 
@@ -26,6 +27,7 @@ class BasePlug(object):
         self._connections = []
         self._dirty = False  # false is clean
         self._value = value
+        self.isLive = False
         self.computed = 0
         self.affects = set()
 
@@ -147,9 +149,13 @@ class BasePlug(object):
     def setDownStreamDirty(self):
         visitedNodes = set()
         for plug in self.affects:
+            if plug.dirty:
+                continue
             # walk if connected
             if plug.isConnected():
                 for edge in plug.connections:
+                    if edge.input.dirty:
+                        continue
                     edge.input.dirty = True
                     # if we haven't visited this node before then call setDownStreamDirty on it
                     if edge not in visitedNodes:
@@ -208,6 +214,15 @@ class InputPlug(BasePlug):
 
     @property
     def value(self):
+        if not self.dirty:
+            return self._value
+        if not self.isConnected():
+            self.dirty = False
+            return self._value
+        edge = self.connections[0]
+        connectedValue = edge.output.value
+        self.value = connectedValue
+        self.dirty = False
         return self._value
 
     @value.setter
@@ -227,7 +242,6 @@ class InputPlug(BasePlug):
     @dirty.setter
     def dirty(self, value):
         self._dirty = value
-        self.computed = 0
         self.setDownStreamDirty()
         self.dirtyStateChanged.emit(self, value)
 
@@ -262,22 +276,14 @@ class OutputPlug(BasePlug):
         self._io = "output"
 
     @property
-    def dirty(self):
-        """gets the dirty state of the plug
-        :return: bool
-        """
-        return self._dirty
+    def value(self):
+        if self.dirty:
+            self._node.compute(self)
+        return self._value
 
-    @dirty.setter
-    def dirty(self, value):
-        """sets the dirty state of the plug
-        :param value: bool, the dirty state(False==clean, True==dirty)
-        :return: None
-        """
-        self._dirty = value
-        if value:
-            self.computed = 0
-        self.dirtyStateChanged.emit(self, value)
+    @value.setter
+    def value(self, value):
+        self._value = value
 
     def connect(self, plug, edge=None):
         if not self.isConnectedTo(plug):
@@ -287,21 +293,3 @@ class OutputPlug(BasePlug):
             self._connections.append(edge)
             plug.connect(self)
             BasePlug.connect(self, plug, edge=edge)
-
-    def request(self):
-        for inputPlug in self.affects:
-            if not inputPlug.dirty:
-                continue
-            if not inputPlug.isConnected():
-                # mark clean
-                inputPlug.dirty = False
-                continue
-            connectedEdge = inputPlug.connections[0]
-            connectedEdge.output.request()
-            inputPlug._value = connectedEdge.output.value
-            inputPlug.dirty = False
-
-        if not self.computed:
-            log.debug("computing, %s, %s" % (self.node.name, self.name))
-            self._node.compute(requestPlug=self)
-            self.computed = 1

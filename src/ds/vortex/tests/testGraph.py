@@ -76,7 +76,7 @@ class TestGraphDirty(unittest.TestCase):
         self.assertTrue(self.addNode3.getPlug("value1").dirty)
         self.assertTrue(self.addNode3.getPlug("value2").dirty)
         self.assertTrue(self.addNode3.getPlug("output").dirty)
-        self.graph.requestEvaluate(self.addNode3.getPlug("output"))
+        # self.graph.requestEvaluate(self.addNode3.getPlug("output"))
         self.assertEquals(self.addNode3.getPlug("output").value, 90)
         # requestEvalate computes all dirty nodes, so all the plugs should be clean
         self.assertFalse(self.addNode1.getPlug("value2").dirty)
@@ -89,30 +89,30 @@ class TestGraphDirty(unittest.TestCase):
         self.assertFalse(self.addNode3.getPlug("output").dirty)
 
 
-class TestLiveGraphMode(unittest.TestCase):
-    def setUp(self):
-        self.graph = graph.Graph("liveGraph")
-
-    def testLiveGraphTriggerEvaluation(self):
-        self.addNode = add.AddNode("addNode")
-        self.scalar1 = scalar.ScalarNode("scalar1")
-        self.scalar2 = scalar.ScalarNode("scalar2")
-        self.scalar1.getPlug("output").connect(self.addNode.getPlug("value1"))
-        self.scalar2.getPlug("output").connect(self.addNode.getPlug("value2"))
-        livePlug = self.addNode.getPlug("output")
-        self.graph.createLivePlug(livePlug)
-        self.assertIsNone(livePlug.value)
-        self.scalar1.getPlug("value").value = 10
-        self.assertEquals(livePlug.value, 10)
-        self.scalar2.getPlug("value").value = 10
-        self.assertEquals(livePlug.value, 20)
-        self.graph.removeLivePlug(livePlug, self.graph._livePlugDirtySignalCheck)
-        self.assertFalse(self.graph.liveMode)
-        self.assertEquals(len(livePlug.dirtyStateChanged), 0)
-        self.assertFalse(livePlug.dirty)
-        self.scalar2.getPlug("value").value = 5
-        self.assertEquals(livePlug.value, 20)
-        self.graph.requestEvaluate(livePlug)
+# class TestLiveGraphMode(unittest.TestCase):
+#     def setUp(self):
+#         self.graph = graph.Graph("liveGraph")
+#
+#     def testLiveGraphTriggerEvaluation(self):
+#         self.addNode = add.AddNode("addNode")
+#         self.scalar1 = scalar.ScalarNode("scalar1")
+#         self.scalar2 = scalar.ScalarNode("scalar2")
+#         self.scalar1.getPlug("output").connect(self.addNode.getPlug("value1"))
+#         self.scalar2.getPlug("output").connect(self.addNode.getPlug("value2"))
+#         livePlug = self.addNode.getPlug("output")
+#         # self.graph.createLivePlug(livePlug)
+#         self.assertIsNone(livePlug.value)
+#         self.scalar1.getPlug("value").value = 10
+#         self.assertEquals(livePlug.value, 10)
+#         self.scalar2.getPlug("value").value = 10
+#         self.assertEquals(livePlug.value, 20)
+#         # self.graph.removeLivePlug(livePlug, self.graph._livePlugDirtySignalCheck)
+#         self.assertFalse(self.graph.liveMode)
+#         self.assertEquals(len(livePlug.dirtyStateChanged), 0)
+#         self.assertFalse(livePlug.dirty)
+#         self.scalar2.getPlug("value").value = 5
+#         self.assertEquals(livePlug.value, 20)
+        # self.graph.requestEvaluate(livePlug)
 
 
 class TestSerialize(unittest.TestCase):

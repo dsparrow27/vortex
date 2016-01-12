@@ -118,43 +118,6 @@ class Graph(object):
 
         return leafNodes
 
-    def createLivePlug(self, plug):
-        """Connects the plug dirty state changed signal to evaluate the graph.
-        :param plug:
-        """
-        plug.dirtyStateChanged.connect(self._livePlugDirtySignalCheck)
-        if not self.liveMode:
-            self.liveMode = True
-
-    def removeLivePlug(self, plug, event):
-        """Removes the event from th plug.dirtyStateChanged
-        :param plug: plug instance, the plug instance to disconnect
-        :param event: function instance, the function that gets called to be removed
-        """
-        plug.dirtyStateChanged.removeEvent(event)
-        self.liveMode = False
-
-    def _livePlugDirtySignalCheck(self, plug, dirtyState):
-        """Private use only, Calls requestEvaluation for a plug if the dirtyState is True and live mode is on
-        :param plug: outputPlug instance , the plug isinstance to request
-        :param dirtyState: bool, the state of the dirty flag for the plug
-        :return: None
-        """
-        if self.liveMode and dirtyState:
-            self.requestEvaluate(plug)
-            logger.debug("Triggering request Evaluation via live mode")
-
-    def requestEvaluate(self, outputPlug):
-        """Computes the appropriate nodes for the output plug, will evaluate all dirty plugs/nodes that need to be done
-        for this plug
-        :param outputPlug: plug instance to compute
-        """
-        if not outputPlug.isOutput():
-            return
-        if not outputPlug.dirty:
-            return outputPlug.value
-        outputPlug.request()
-
     def serializeGraph(self):
         logger.debug("serializing graph")
         serializedGraph = {"name": self._name,

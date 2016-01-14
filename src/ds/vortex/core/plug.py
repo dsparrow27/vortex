@@ -292,3 +292,4 @@ class OutputPlug(BasePlug):
             self._connections.append(edge)
             plug.connect(self)
             BasePlug.connect(self, plug, edge=edge)
+            return edge

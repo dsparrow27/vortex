@@ -1,16 +1,22 @@
 import inspect
 from collections import OrderedDict
+
 import baseEdge
 from ds.vortex import customLogger
 from ds.vortex.core import vortexEvent
-from ds.vortex.core import plug as basePlug
 
 logger = customLogger.getCustomLogger()
 
 
 class Graph(object):
-    """This graph class stores the nodes and will evaluate the graph on request, to request a compute you will first need
-    the output plug instance and then call Graph.requestEvaluate(outputPlug)
+    """This graph class stores the nodes and will evaluate the graph on request.
+    Simple example:
+    gx = Graph("newGraph")
+    t = addNode.AddNode("newMathNode") # first create an instance of the node
+    gx.addNode(t) # adds a node to the graph
+    gx.getNode("newMathNode") # gets node by name
+    if t in gx:
+        print t.name # check to see if newNode is in the graph
     """
     addedNode = vortexEvent.VortexSignal()
     removedNode = vortexEvent.VortexSignal()
@@ -34,6 +40,29 @@ class Graph(object):
 
     def __eq__(self, other):
         return isinstance(other, Graph) and self._nodes == other.nodes
+
+    def __iter__(self):
+        """Iterates the nodes in the graph
+        :return: iter
+        """
+        return iter(self._nodes.values())
+
+    def __getitem__(self, index):
+        """Gets a node from the graph via a index
+        :param index: int, the node index
+        :return: Node
+        """
+        return self._nodes.values()[index]
+
+    def __contains__(self, node):
+        """Returns a bool if the node is in the graph
+        :param node: BaseNode instance
+        :return:bool
+        """
+        try:
+            return node in self._nodes.values()
+        except TypeError:
+            return False
 
     def addNode(self, node, **kwargs):
         """Adds a Node instance to the graph this will also add the node to the graph class instance as a attribute
@@ -62,6 +91,9 @@ class Graph(object):
 
     @nodes.setter
     def nodes(self, newNodes):
+        """Empties and sets the nodes dict
+        :param newNodes: dict
+        """
         self._nodes = newNodes
 
     def hasNode(self, node):
@@ -119,6 +151,9 @@ class Graph(object):
         return leafNodes
 
     def serializeGraph(self):
+        """Creates a python dict from the graph, each node,plug and edge gets serialized
+        :return:
+        """
         logger.debug("serializing graph")
         serializedGraph = {"name": self._name,
                            "version": "1.0.0",
@@ -139,6 +174,10 @@ class Graph(object):
 
     @classmethod
     def loadGraph(cls, graphData):
+        """load a vortex graph dict creates and returns a graph object
+        :param graphData: dict
+        :return: Graph()
+        """
         graph = cls(name=graphData.get("name"))
         for node in graphData["nodes"].values():
             modulePath = node.get("modulePath")

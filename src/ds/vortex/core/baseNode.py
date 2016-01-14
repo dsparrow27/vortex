@@ -1,7 +1,7 @@
-from collections import OrderedDict
-from ds.vortex import customLogger as cusLogger
 import inspect
+from collections import OrderedDict
 
+from ds.vortex import customLogger as cusLogger
 from ds.vortex.core import vortexEvent
 
 logger = cusLogger.getCustomLogger()
@@ -24,7 +24,7 @@ class BaseNode(object):
         self.initialize()
 
     def __repr__(self):
-        return "{}{}".format(self.__class__.__name__, self.__dict__)
+        return "{}".format(self.name)
 
     def __eq__(self, other):
         """Determines if the node and its plugs equal
@@ -41,7 +41,7 @@ class BaseNode(object):
 
     @staticmethod
     def plugAffects(inputPlug, outputPlug):
-        """Add a link between to plugs on the same node, gets added to affects variable
+        """Add a link between to plugs on the same node, gets added to affects variable, designed to be used in subclasses
         :param inputPlug: inputPlug instance
         :param outputPlug: outputPlug instance
         """
@@ -52,7 +52,7 @@ class BaseNode(object):
 
     @staticmethod
     def getPlugAffects(plug):
-        """Return the affect set for the plug
+        """Return the affect set for the plug, designed to be used in subclasses
         :param plug: plug instance
         :return: set()
         """

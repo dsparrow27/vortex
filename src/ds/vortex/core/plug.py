@@ -1,6 +1,7 @@
 import inspect
-from ds.vortex.core import baseEdge
+
 from ds.vortex import customLogger as customLogger
+from ds.vortex.core import baseEdge
 from ds.vortex.core import vortexEvent
 
 log = customLogger.getCustomLogger()
@@ -27,8 +28,6 @@ class BasePlug(object):
         self._connections = []
         self._dirty = False  # false is clean
         self._value = value
-        self.isLive = False
-        self.computed = 0
         self.affects = set()
 
     def __repr__(self):

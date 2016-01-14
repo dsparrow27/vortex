@@ -7,7 +7,10 @@ class VortexSignal(object):
     """Custom event signal class, allows you to connect an event to a function or object
     2 main methods that need to be called the first is: connect(funcCall), this adds the arg(func) as a event,
     the second is emit , this is used to trigger the connected events,
-    emit(*args, **kwargs) == someFunction(*args, *kwargs)
+    emit(*args, **kwargs) == someFunction(*args, **kwargs)
+    example:  myEvent = VortexSignal()
+              myEvent.connect(someFunc) # use partial for args
+              myEvent.emit(10, "something")
     """
 
     def __init__(self):
@@ -39,6 +42,9 @@ class VortexSignal(object):
         logger.debug("Adding event funcCall:: %s" % func)
 
     def hasEvents(self):
+        """Checks if object has events
+        :return: bool
+        """
         if not self.events:
             return False
         return True

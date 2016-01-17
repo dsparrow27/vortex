@@ -1,4 +1,5 @@
 import unittest
+
 from ds.vortex.core import plug as plugs
 
 
@@ -35,7 +36,7 @@ class TestPlug(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    from ds.vortex import customLogger
+    from vortex import customLogger
 
     logger = customLogger.getCustomLogger()
     unittest.main(verbosity=2)

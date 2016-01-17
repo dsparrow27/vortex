@@ -1,7 +1,9 @@
 import unittest
+
 from ds.vortex.nodes.array import append
 from ds.vortex.nodes.array import extend
 from ds.vortex.nodes.array import indexByValue
+
 from ds.vortex.nodes.array import pop
 
 

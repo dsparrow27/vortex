@@ -1,12 +1,14 @@
-import unittest
 import math
+import unittest
+
 from ds.vortex import customLogger
 from ds.vortex.nodes.math.trigonometry import arccos
-from ds.vortex.nodes.math.trigonometry import arcsin
 from ds.vortex.nodes.math.trigonometry import arctan
 from ds.vortex.nodes.math.trigonometry import cos
 from ds.vortex.nodes.math.trigonometry import sin
 from ds.vortex.nodes.math.trigonometry import tan
+
+from ds.vortex.nodes.math.trigonometry import arcsin
 
 
 class TestMathArcCosNode(unittest.TestCase):

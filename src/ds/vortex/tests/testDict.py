@@ -1,7 +1,7 @@
 import unittest
+
 from ds.vortex.nodes.dict import add
 from ds.vortex.nodes.dict import get
-from ds.vortex.nodes.dict import remove
 
 
 class TestAddDict(unittest.TestCase):

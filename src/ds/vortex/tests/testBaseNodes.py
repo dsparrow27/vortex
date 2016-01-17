@@ -1,7 +1,10 @@
 import unittest
 from collections import OrderedDict
-from ds.vortex.core import baseNode, plug
+
+from ds.vortex.core import baseNode
 from ds.vortex.nodes.math.basic import add
+
+from ds.vortex.core import plug
 
 
 class TestBaseNode(unittest.TestCase):

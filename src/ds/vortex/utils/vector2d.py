@@ -1,5 +1,6 @@
 import math
 
+
 class Vector2D(object):
     def __init__(self, vec=None):
         if isinstance(vec, Vector2D):
@@ -15,29 +16,53 @@ class Vector2D(object):
     def __len__(self):
         return len(self.vec)
 
-    def __eq__(self, other):
-        return isinstance(other, Vector2D) and self.vec == other.vec
+    def __eq__(self, vec):
+        return isinstance(vec, Vector2D) and self.vec == vec.vec
 
     def __add__(self, vec):
+        """Adds two vectors together and the returns the resulting example
+        :param vec: Vector2D or flost3
+        :return: Vector2D
+        """
         assert len(self.vec) == len(vec)
         return Vector2D([self.vec[i] + vec[i] for i in range(len(self))])
 
     def __sub__(self, vec):
+        """Subtracts the two vectors
+        :param vec: Vector2D
+        :return: Vector2D
+        """
         return self + (-vec)
 
     def __neg__(self):
+        """Negates the vector
+        :return: Vector2D, return the negative of the vector, eg (1,-1,2) == (-1,1,-2)
+        """
         return Vector2D([vec * -1 for vec in self.vec])
 
-    def __mul__(self, other):
-        return sum(Vector2D([self.vec[i] * other[i] for i in range(len(self.vec))]))
+    def __mul__(self, vec):
+        """Dot product(scalar product) of two vectors. Takes Two equal length vectors and returns a single number.
+        :param other: Vector2D instance or float3
+        :return: Vector2D
+        """
+        assert len(self.vec) == len(vec)
+        return sum(Vector2D([self.vec[i] * vec[i] for i in range(len(self.vec))]))
 
     def __rmul__(self, scalar):
         return Vector2D([x * scalar for x in self.vec])
 
     def __getitem__(self, item):
+        """Gets the index value from the vector
+        :param item: int, the index value in the vector to get
+        :return: float or int
+        """
         return self.vec[item]
 
     def __setitem__(self, key, value):
+        """Sets the value within the vector via the index
+        :param key:
+        :param value:
+        """
         self.vec[key] = value
 
     def length(self):

@@ -1,3 +1,4 @@
+import imp
 import inspect
 from collections import OrderedDict
 
@@ -41,12 +42,6 @@ class Graph(object):
     def __eq__(self, other):
         return isinstance(other, Graph) and self._nodes == other.nodes
 
-    def __iter__(self):
-        """Iterates the nodes in the graph
-        :return: iter
-        """
-        return iter(self._nodes.values())
-
     def __getitem__(self, index):
         """Gets a node from the graph via a index
         :param index: int, the node index
@@ -75,6 +70,7 @@ class Graph(object):
             return
         node.name = self.generateUniqueName(node)
         self._nodes[node.name] = node
+
         for plugName, plugValue in kwargs.iteritems():
             plug = node.getPlug(plugName)
             if plug.isInput():
@@ -122,14 +118,12 @@ class Graph(object):
         :param node: node Instance
         :return: str, returns the new node name as a string
         """
-        increObj = IncrementObject(0, 1)
-        num = increObj.add()
-        if node.name not in self._nodes:
-            return node.name
-        name = node.name + num
+        value = "%0{}d".format(0)
+        uIndex = 0
+        name = node.name
         while name in self._nodes:
-            name = node.name + increObj.add()
-
+            name = node.name + value % uIndex
+            uIndex += 1
         return name
 
     def clear(self):
@@ -159,10 +153,8 @@ class Graph(object):
                            "version": "1.0.0",
                            "nodes": OrderedDict(),
                            "edges": dict(),
-                           "className": type(self).__name__,
                            "moduleName": inspect.getmodulename(__file__),
-                           "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(
-                               ".py", "")
+                           "modulePath": inspect.getfile(self.__class__)
                            }
         logger.debug(serializedGraph)
         for node in self._nodes.values():
@@ -182,7 +174,8 @@ class Graph(object):
         for node in graphData["nodes"].values():
             modulePath = node.get("modulePath")
             try:
-                module = __import__(modulePath, globals(), locals(), [node.get("moduleName")], -1)
+                module = imp.load_source(node.get("moduleName"), modulePath)
+                # module = __import__(modulePath, globals(), locals(), [node.get("moduleName")], -1)
             except ImportError, er:
                 logger.error("""importing {0} Failed! , have you typed the right name?,
                     check nodes package.""".format(modulePath))
@@ -200,27 +193,3 @@ class Graph(object):
             outputPlug.connections.append(newEdge)
 
         return graph
-
-
-class IncrementObject(object):
-    """A class to help with incrementing a number with a padding
-    """
-
-    def __init__(self, startNumber, padding):
-        """initializes the seq number with start number and a padding value, use self.add() to add one number
-        :param startNumber: int, the number for the sequence to start at
-        :param padding: int, the number of numbers(zeros) to add in front of the seq number
-        """
-        self.seq = startNumber
-        self.padding = padding
-        self.currentValue = ""
-
-    def add(self):
-        """Increments the seq by and adds a padding value
-        :return: str
-        """
-        value = "%0{}d".format(self.padding)
-        value = value % self.seq
-        self.seq += 1
-        self.currentValue = value
-        return value

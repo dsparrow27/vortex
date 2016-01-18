@@ -1,6 +1,8 @@
 import inspect
 from collections import OrderedDict
 
+import imp
+
 from ds.vortex import customLogger as cusLogger
 from ds.vortex.core import vortexEvent
 
@@ -14,6 +16,29 @@ class BaseNode(object):
     deletedPlug = vortexEvent.VortexSignal()  # emits the deleted plug
     computed = vortexEvent.VortexSignal()  # emits the node instance computed and the outputPlug
     initializing = vortexEvent.VortexSignal()  # emits the node instance
+
+    @staticmethod
+    def plugAffects(inputPlug, outputPlug):
+        """Add a link between to plugs on the same node, gets added to affects variable, designed to be used in subclasses
+        :param inputPlug: inputPlug instance
+        :param outputPlug: outputPlug instance
+        """
+        logger.debug(
+            "Setting plug affection:: inputPlug > {0}, outputPlug > {1}".format(inputPlug.name, outputPlug.name))
+        inputPlug.affects.add(outputPlug)
+        outputPlug.affects.add(inputPlug)
+
+    @staticmethod
+    def getPlugAffects(plug):
+        """Return the affect set for the plug, designed to be used in subclasses
+        :param plug: plug instance
+        :return: set()
+        """
+        affection = plug.affects
+        logger.debug(
+            "got plug affection:: plug > {0}, affected by > {1}".format(plug.name,
+                                                                        [affect.name for affect in affection]))
+        return affection
 
     def __init__(self, name):
         """
@@ -38,29 +63,6 @@ class BaseNode(object):
         :return: int, the length of the plugs
         """
         return len(self._plugs)
-
-    @staticmethod
-    def plugAffects(inputPlug, outputPlug):
-        """Add a link between to plugs on the same node, gets added to affects variable, designed to be used in subclasses
-        :param inputPlug: inputPlug instance
-        :param outputPlug: outputPlug instance
-        """
-        logger.debug(
-            "Setting plug affection:: inputPlug > {0}, outputPlug > {1}".format(inputPlug.name, outputPlug.name))
-        inputPlug.affects.add(outputPlug)
-        outputPlug.affects.add(inputPlug)
-
-    @staticmethod
-    def getPlugAffects(plug):
-        """Return the affect set for the plug, designed to be used in subclasses
-        :param plug: plug instance
-        :return: set()
-        """
-        affection = plug.affects
-        logger.debug(
-            "got plug affection:: plug > {0}, affected by > {1}".format(plug.name,
-                                                                        [affect.name for affect in affection]))
-        return affection
 
     @property
     def plugs(self):
@@ -135,9 +137,8 @@ class BaseNode(object):
         """
         data = {"name": self.name,
                 "plugs": OrderedDict(),
-                "className": type(self).__name__,
                 "moduleName": inspect.getmodulename(__file__),
-                "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(".py", "")
+                "modulePath": inspect.getfile(self.__class__)
                 }
         for plug in self._plugs.values():
             data["plugs"][plug.name] = plug.serialize()
@@ -149,17 +150,18 @@ class BaseNode(object):
         """
         for plug in plugDict.values():
             modulePath = plug.get("modulePath")
+            ioType = plug.get("io")
             try:
-                module = __import__(modulePath, globals(), locals(), [plug.get("moduleName")], -1)
+                module = imp.load_source(plug.get("moduleName"), modulePath)
             except ImportError, er:
                 logger.error("""importing {0} Failed! , have you typed the right name?,
                     check self.modulesDict for availables Modules.""".format(modulePath))
                 raise er
-            ioType = plug.get("io")
+
             if ioType == "input":
                 self.addPlug(module.InputPlug(name=plug.get("name"), node=self, value=plug.get("value")))
-            else:
-                self.addPlug(module.OutputPlug(name=plug.get("name"), node=self, value=plug.get("value")))
+                continue
+            self.addPlug(module.OutputPlug(name=plug.get("name"), node=self, value=plug.get("value")))
 
     def log(self, tabLevel=-1):
         """Return the hierarchy for this node including the plugs

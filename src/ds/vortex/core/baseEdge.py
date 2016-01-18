@@ -66,9 +66,8 @@ class Edge(object):
         if outputNode:
             outputNodeName = outputNode.name
         data = {"name": self.name,
-                "className": type(self).__name__,
                 "moduleName": inspect.getmodulename(__file__),
-                "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(".py", ""),
+                "modulePath": inspect.getfile(self.__class__),
                 "input": (self.input.name, inputNodeName),
                 "output": (self.output.name, outputNodeName),
                 "arbitraryData": self.arbitraryData

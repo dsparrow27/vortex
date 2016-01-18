@@ -1,5 +1,4 @@
 import inspect
-
 from ds.vortex import customLogger as customLogger
 from ds.vortex.core import baseEdge
 from ds.vortex.core import vortexEvent
@@ -114,12 +113,20 @@ class BasePlug(object):
         return False
 
     def isConnectedTo(self, plug):
+        """Determines if self is connected to the plug, calls on BaseEdge.isConnected()
+        :param plug:
+        :return:
+        """
         for edge in self._connections:
             if edge.isConnected(self, plug):
                 return True
         return False
 
     def getConnection(self, plug):
+        """returns the edge that is connected to the plug and self
+        :param plug: InputPlug or OutputPlug
+        :return: BaseEdge
+        """
         for edge in self._connections:
             match = edge.isConnected(self, plug)
             if match:
@@ -131,7 +138,7 @@ class BasePlug(object):
         :return: None
         """
         log.debug("Could not find plug in connections")
-        for index, edge in enumerate(self._connections):
+        for edge in self._connections:
             if edge.isConnected(self, plug):
                 edge.delete()
                 self.connectionRemoved.emit(edge)
@@ -169,9 +176,8 @@ class BasePlug(object):
         data = {"name": self.name,
                 "io": self.io,
                 "value": self._value,
-                "className": type(self).__name__,
                 "moduleName": inspect.getmodulename(__file__),
-                "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(".py", "")
+                "modulePath": inspect.getfile(self.__class__)
                 }
         return data
 
@@ -213,6 +219,9 @@ class InputPlug(BasePlug):
 
     @property
     def value(self):
+        """Return the value of the plug, this can have any data type.
+        :return: Type(), returns whatever value for the plug(used in compute function)
+        """
         if not self.dirty:
             return self._value
         if not self.isConnected():
@@ -226,8 +235,10 @@ class InputPlug(BasePlug):
 
     @value.setter
     def value(self, value):
-        """sets the value of the plug and sets the plug dirty, calls on the parent node setDownStreamDirty(inputPlug)
-        :param value: the value to set
+        """sets the value of the plug, can have any data type and any value eg. custom python object, dict etc.
+        The function will also set the plug to dirty
+        :param value: the value to give the plug
+        :return: None
         """
         # pass the value to all connected plugs if it is connected
         self._value = value
@@ -276,19 +287,27 @@ class OutputPlug(BasePlug):
 
     @property
     def value(self):
+        """Return the value of the plug, this can have any data type.
+        :return: Type(), returns whatever value for the plug(used in compute function)
+        """
         if self.dirty:
             self._node.compute(self)
         return self._value
 
     @value.setter
     def value(self, value):
+        """Sets the value of the plug, can have any data type and any value eg. custom python object, dict etc.
+        The function will also set the plug to dirty
+        :param value: the value to give the plug
+        :return: None
+        """
         self._value = value
 
     def connect(self, plug, edge=None):
         if not self.isConnectedTo(plug):
             edge = plug.getConnection(self)
             if not edge:
-                edge = baseEdge.Edge(self.name + "_" + plug.name, input=plug, output=self)
+                edge = baseEdge.Edge("_".join([self.name, plug.name]), input=plug, output=self)
             self._connections.append(edge)
             plug.connect(self)
             BasePlug.connect(self, plug, edge=edge)

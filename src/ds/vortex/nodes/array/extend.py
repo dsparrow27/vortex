@@ -3,6 +3,11 @@ from ds.vortex.core import plug as plugs
 
 
 class ArrayExtend(baseNode.BaseNode):
+    """Appends the contents of a seq to a list
+    plugs:
+        value1: the list to append to
+        value2: the seq to append
+    """
     def __init__(self, name):
         """
         :param name: str, the name of the node

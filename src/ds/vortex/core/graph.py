@@ -1,11 +1,12 @@
-import imp
 import inspect
+import pprint
 from collections import OrderedDict
 
 import baseEdge
 from ds.vortex import customLogger
+from ds.vortex.core import baseNode
 from ds.vortex.core import vortexEvent
-
+from ds.vortex import nodes
 logger = customLogger.getCustomLogger()
 
 
@@ -66,11 +67,15 @@ class Graph(object):
         :param kwargs: plugName=plugValue, the kwargs sets the input plugs value.
         :return Node instance
         """
+
         if self.hasNode(node):
+            # print node in self._nodes.values()
+            # print self.nodes, node.name
             return
         node.name = self.generateUniqueName(node)
+        # print node.name, "::::::::::::::"
         self._nodes[node.name] = node
-
+        # print self._nodes, "::::::"
         for plugName, plugValue in kwargs.iteritems():
             plug = node.getPlug(plugName)
             if plug.isInput():
@@ -97,7 +102,7 @@ class Graph(object):
         :param node: node instance
         :return: bool
         """
-        return node in self._nodes.values()
+        return node.name in self._nodes.keys()
 
     def deleteNode(self, node):
         """Removes a node from the graph
@@ -121,7 +126,9 @@ class Graph(object):
         value = "%0{}d".format(0)
         uIndex = 0
         name = node.name
+        # print name, "::::"
         while name in self._nodes:
+            # print "innerloop"
             name = node.name + value % uIndex
             uIndex += 1
         return name
@@ -153,8 +160,7 @@ class Graph(object):
                            "version": "1.0.0",
                            "nodes": OrderedDict(),
                            "edges": dict(),
-                           "moduleName": inspect.getmodulename(__file__),
-                           "modulePath": inspect.getfile(self.__class__)
+                           "moduleName": inspect.getmodulename(__file__)
                            }
         logger.debug(serializedGraph)
         for node in self._nodes.values():
@@ -172,24 +178,32 @@ class Graph(object):
         """
         graph = cls(name=graphData.get("name"))
         for node in graphData["nodes"].values():
-            modulePath = node.get("modulePath")
-            try:
-                module = imp.load_source(node.get("moduleName"), modulePath)
-                # module = __import__(modulePath, globals(), locals(), [node.get("moduleName")], -1)
-            except ImportError, er:
-                logger.error("""importing {0} Failed! , have you typed the right name?,
-                    check nodes package.""".format(modulePath))
-                raise er
-            newNode = module.getNode()(name=node.get("name"))
-            newNode.addPlugsFromDict(node.get("plugs"))
+            moduleName = node.get("moduleName")
+            nodeName = node.get("name")
 
+            if moduleName == "baseNode":
+                newNode = baseNode.BaseNode(name=nodeName)
+            else:
+                newNode = nodes.getNode(node.get("moduleName"))(name=nodeName)
+            for plugName, values in node.get("plugs").iteritems():
+                plug = newNode.getPlug(plugName=plugName)
+                if plug:
+                    plug.value = values.get("value")
+                    continue
+                newNode.addPlugByType(ioType=values.get("io"), name=plugName, value=values.get("value"))
+            # print newNode,newNode.name, ">>>>>"
             graph.addNode(newNode)
 
         for edge in graphData["edges"].values():
+            # print graph.nodes
+            print edge["input"][0]
+            print graph.getNode(edge["input"][1]).plugs
             inputPlug = graph.getNode(edge["input"][1]).getPlug(edge["input"][0])
             outputPlug = graph.getNode(edge["output"][1]).getPlug(edge["output"][0])
             newEdge = baseEdge.Edge(name=edge["name"], input=inputPlug, output=outputPlug)
-            inputPlug.connections = [newEdge]
-            outputPlug.connections.append(newEdge)
+            print inputPlug
+            print outputPlug
+
+            newEdge.connect(inputPlug, outputPlug)
 
         return graph

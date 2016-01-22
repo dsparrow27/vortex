@@ -27,24 +27,24 @@ class TestCase(unittest.TestCase):
         self.assertTrue(self.edge.isConnected(self.inputPlug, self.outputPlug))
         self.assertFalse(edge3.isConnected(self.inputPlug, self.outputPlug))
 
-    def testSerialize(self):
-        data = self.edge.serialize()
-        correctData = {'arbitraryData': None,
-                       'className': 'Edge',
-                       'input': ('inputPlug1', None),
-                       'moduleName': 'baseEdge',
-                       'modulePath': 'ds.vortex.core.baseEdge',
-                       'name': 'testEdge1',
-                       'output': ('outputPlug1', None)
-                       }
-        incorrectData = {"name": "test",
-                         "input": "input",
-                         "output": None,
-                         "arbitraryData": None
-                         }
-        self.assertIsInstance(data, dict)
-        self.assertEquals(data, correctData)
-        self.assertNotEquals(data, incorrectData)
+    # def testSerialize(self):
+    #     data = self.edge.serialize()
+    #     correctData = {'arbitraryData': None,
+    #                    'className': 'Edge',
+    #                    'input': ('inputPlug1', None),
+    #                    'moduleName': 'baseEdge',
+    #                    'modulePath': 'ds.vortex.core.baseEdge',
+    #                    'name': 'testEdge1',
+    #                    'output': ('outputPlug1', None)
+    #                    }
+    #     incorrectData = {"name": "test",
+    #                      "input": "input",
+    #                      "output": None,
+    #                      "arbitraryData": None
+    #                      }
+    #     self.assertIsInstance(data, dict)
+    #     self.assertEquals(data, correctData)
+    #     self.assertNotEquals(data, incorrectData)
 
 
 if __name__ == "__main__":

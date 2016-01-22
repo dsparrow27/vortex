@@ -52,6 +52,11 @@ class BasePlug(object):
         :return: None
         """
         self._dirty = value
+        if self.isConnected():
+            for edge in self.connections:
+                if edge.input.dirty:
+                    continue
+                edge.input.dirty = True
         self.dirtyStateChanged.emit(self, value)
 
     @property
@@ -152,23 +157,6 @@ class BasePlug(object):
         log.debug("connected plugs::".format(plug.name, self.name))
         self.connectionAdded.emit(plug, edge)
 
-    def setDownStreamDirty(self):
-        visitedNodes = set()
-        for plug in self.affects:
-            if plug.dirty:
-                continue
-            # walk if connected
-            if plug.isConnected():
-                for edge in plug.connections:
-                    if edge.input.dirty:
-                        continue
-                    edge.input.dirty = True
-                    # if we haven't visited this node before then call setDownStreamDirty on it
-                    if edge not in visitedNodes:
-                        visitedNodes.add(edge)
-                        continue
-            plug.dirty = True
-
     def serialize(self):
         """Serializes the plug as a dict
         :return: dict,
@@ -176,8 +164,7 @@ class BasePlug(object):
         data = {"name": self.name,
                 "io": self.io,
                 "value": self._value,
-                "moduleName": inspect.getmodulename(__file__),
-                "modulePath": inspect.getfile(self.__class__)
+                "moduleName": inspect.getmodulename(__file__)
                 }
         return data
 
@@ -252,7 +239,10 @@ class InputPlug(BasePlug):
     @dirty.setter
     def dirty(self, value):
         self._dirty = value
-        self.setDownStreamDirty()
+        for plug in self.affects:
+            if plug.dirty:
+                continue
+            plug.dirty = value
         self.dirtyStateChanged.emit(self, value)
 
     def connect(self, plug, edge=None):

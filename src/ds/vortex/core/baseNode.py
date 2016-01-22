@@ -1,8 +1,8 @@
+"""Code module for a graph node.
+"""
 import inspect
 from collections import OrderedDict
-
-import imp
-
+import plug
 from ds.vortex import customLogger as cusLogger
 from ds.vortex.core import vortexEvent
 
@@ -82,6 +82,13 @@ class BaseNode(object):
         if clean:
             plug.dirty = False
 
+    def addPlugByType(self, ioType, name, value=None):
+        if ioType == "input":
+            self.addPlug(plug.InputPlug(name=name, node=self, value=value))
+        else:
+            self.addPlug(plug.OutputPlug(name=name, node=self, value=value))
+        return self.getPlug(name)
+
     def getPlug(self, plugName):
         """Returns the plug based on the name
         :param plugName: str, the plug name to get
@@ -137,31 +144,11 @@ class BaseNode(object):
         """
         data = {"name": self.name,
                 "plugs": OrderedDict(),
-                "moduleName": inspect.getmodulename(__file__),
-                "modulePath": inspect.getfile(self.__class__)
+                "moduleName": inspect.getmodulename(__file__)
                 }
         for plug in self._plugs.values():
             data["plugs"][plug.name] = plug.serialize()
         return data
-
-    def addPlugsFromDict(self, plugDict):
-        """Creates plug objects for the node based on the plugDict
-        :param plugDict: dict
-        """
-        for plug in plugDict.values():
-            modulePath = plug.get("modulePath")
-            ioType = plug.get("io")
-            try:
-                module = imp.load_source(plug.get("moduleName"), modulePath)
-            except ImportError, er:
-                logger.error("""importing {0} Failed! , have you typed the right name?,
-                    check self.modulesDict for availables Modules.""".format(modulePath))
-                raise er
-
-            if ioType == "input":
-                self.addPlug(module.InputPlug(name=plug.get("name"), node=self, value=plug.get("value")))
-                continue
-            self.addPlug(module.OutputPlug(name=plug.get("name"), node=self, value=plug.get("value")))
 
     def log(self, tabLevel=-1):
         """Return the hierarchy for this node including the plugs

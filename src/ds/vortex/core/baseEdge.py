@@ -1,14 +1,15 @@
 import inspect
 from ds.vortex import customLogger as customLogger
 from ds.vortex.core import vortexEvent
+
 logger = customLogger.getCustomLogger()
 
 
 class Edge(object):
     """Base class for graph edges , a simple class that holds the connection values of plugs,
     """
-    deleted = vortexEvent.VortexSignal() # emit nothing
-    connected = vortexEvent.VortexSignal() # emit inputPlug instance, outputPlug instance
+    deleted = vortexEvent.VortexSignal()  # emit nothing
+    connected = vortexEvent.VortexSignal()  # emit inputPlug instance, outputPlug instance
 
     def __init__(self, name, input=None, output=None, arbitraryData=None):
         """
@@ -57,19 +58,8 @@ class Edge(object):
         """Returns a dict of the input, output and the arbitraryData
         :return: dict
         """
-        inputNode = self.input.node
-        outputNode = self.output.node
-        inputNodeName = None
-        outputNodeName = None
-        if inputNode:
-            inputNodeName = inputNode.name
-        if outputNode:
-            outputNodeName = outputNode.name
-        data = {"name": self.name,
-                "moduleName": inspect.getmodulename(__file__),
-                "modulePath": inspect.getfile(self.__class__),
-                "input": (self.input.name, inputNodeName),
-                "output": (self.output.name, outputNodeName),
-                "arbitraryData": self.arbitraryData
+        return {"name": self.name,
+                "input": (self.input.name, self.input.node.name),
+                "output": (self.output.name, self.output.node.name),
+                "moduleName": inspect.getmodulename(__file__)
                 }
-        return data

@@ -1,0 +1,69 @@
+{
+    "moduleName": "graph", 
+    "name": "serialGraph", 
+    "className": "Graph", 
+    "edges": {
+        "testOutputPlug2_testInputPlug": {
+            "arbitraryData": null, 
+            "name": "testOutputPlug2_testInputPlug", 
+            "moduleName": "baseEdge",
+            "output": [
+                "testOutputPlug2", 
+                "testNode2"
+            ], 
+            "input": [
+                "testInputPlug", 
+                "testNode"
+            ], 
+            "modulePath": "vortex.core.baseEdge"
+        }
+    }, 
+    "version": "0.0.1",
+    "nodes": {
+        "testNode": {
+            "className": "BaseNode", 
+            "plugs": {
+                "testInputPlug": {
+                    "moduleName": "plug", 
+                    "name": "testInputPlug", 
+                    "value": null, 
+                    "io": "input",
+                    "modulePath": "vortex.core.plug"
+                }, 
+                "testOutputPlug": {
+                    "moduleName": "plug", 
+                    "name": "testOutputPlug", 
+                    "value": null, 
+                    "io": "output",
+                    "modulePath": "vortex.core.plug"
+                }
+            }, 
+            "moduleName": "baseNode", 
+            "name": "testNode", 
+            "modulePath": "vortex.core.baseNode"
+        }, 
+        "testNode2": {
+            "className": "BaseNode", 
+            "plugs": {
+                "testInputPlug2": {
+                    "moduleName": "plug", 
+                    "name": "testInputPlug2", 
+                    "value": null, 
+                    "io": "input",
+                    "modulePath": "vortex.core.plug"
+                }, 
+                "testOutputPlug2": {
+                    "moduleName": "plug", 
+                    "name": "testOutputPlug2", 
+                    "value": null, 
+                    "io": "output",
+                    "modulePath": "vortex.core.plug"
+                }
+            }, 
+            "moduleName": "baseNode", 
+            "name": "testNode2", 
+            "modulePath": "vortex.core.baseNode"
+        }
+    }, 
+    "modulePath": "vortex.core.graph"
+}

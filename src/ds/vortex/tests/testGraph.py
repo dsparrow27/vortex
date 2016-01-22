@@ -1,5 +1,7 @@
+import pprint
 import unittest
 from ds.vortex.core import baseNode
+from ds.vortex.core import baseEdge
 from ds.vortex.core import plug as plugs
 from ds.vortex.nodes.math.basic import add
 from ds.vortex.core import graph
@@ -24,8 +26,8 @@ class TestGraph(unittest.TestCase):
     def testAddNode(self):
         self.assertEquals(self.graph.addNode(self.testNode), self.testNode)
         self.assertTrue(len(self.graph.nodes))
-        # should return none if the node is already in the graph
-        self.assertIsNone(self.graph.addNode(self.testNode))
+        # should raise valueError if the node is already in the graph
+        self.assertRaises(ValueError, self.graph.addNode(self.testNode))
 
     def testDeleteNode(self):
         self.graph.addNode(self.testNode)
@@ -122,37 +124,39 @@ class TestSerialize(unittest.TestCase):
         self.assertEquals(len(self.graph.nodes), len(self.newGraph.nodes))
         self.assertEquals(self.graph._name, self.newGraph._name)
 
+        # pprint.pprint(savedGraph)
 
         # the graph dict needs to be a fucking json file should do that at some point next week
 
-        # def testSerializeNodePlugsToGraph(self):
-        #     node = baseNode.BaseNode("testNode")
-        #     node2 = baseNode.BaseNode("testNode2")
-        #     node.addPlug(plugs.InputPlug("testInputPlug", node=node))
-        #     node.addPlug(plugs.OutputPlug("testOutputPlug", node=node))
-        #     node2.addPlug(plugs.InputPlug("testInputPlug2", node=node2))
-        #     node2.addPlug(plugs.OutputPlug("testOutputPlug2", node=node2))
-        #     node2.getPlug("testOutputPlug2").connect(node.getPlug("testInputPlug"))
-        #     self.graph.addNode(node)
-        #     self.graph.addNode(node2)
-        #
-        #     savedGraph = self.graph.serializeGraph()
-        #     self.newGraph = graph.Graph.loadGraph(savedGraph)
-        #     self.assertEquals(len(self.graph), len(self.newGraph))
-        #     self.assertEquals(self.graph._name, self.newGraph._name)
-        #
-        #     for index, node in enumerate(self.graph.nodes.values()):
-        #         self.assertEquals(len(node.plugs), len(self.newGraph.nodes.values()[index].plugs))
-        #         for plugIndex, plug in enumerate(node.plugs.values()):
-        #             newGraphNode = self.newGraph.nodes.values()[index]
-        #             newGraphPlug = newGraphNode.plugs.values()[plugIndex]
-        #             self.assertEqual(plug.name, newGraphPlug.name)
-        #             self.assertEquals(len(plug.connections), 1)
-        #             self.assertEquals(len(newGraphPlug.connections), 1)
-        #             for plugConnection in plug.connections:
-        #                 self.assertIsInstance(plugConnection, baseEdge.Edge)
-        #             for plugConnection in newGraphPlug.connections:
-        #                 self.assertIsInstance(plugConnection, baseEdge.Edge)
+    def testSerializeNodePlugsToGraph(self):
+        node = baseNode.BaseNode("testNode")
+        node2 = baseNode.BaseNode("testNode2")
+        node.addPlug(plugs.InputPlug("testInputPlug", node=node))
+        node.addPlug(plugs.OutputPlug("testOutputPlug", node=node))
+        node2.addPlug(plugs.InputPlug("testInputPlug2", node=node2))
+        node2.addPlug(plugs.OutputPlug("testOutputPlug2", node=node2))
+        node2.getPlug("testOutputPlug2").connect(node.getPlug("testInputPlug"))
+        self.graph.addNode(node)
+        self.graph.addNode(node2)
+
+        savedGraph = self.graph.serializeGraph()
+        print "loading>>>>>>>>>>>>>>>>>>>>>>>"
+        self.newGraph = graph.Graph.loadGraph(savedGraph)
+        self.assertEquals(len(self.graph), len(self.newGraph))
+        self.assertEquals(self.graph._name, self.newGraph._name)
+
+        for index, node in enumerate(self.graph.nodes.values()):
+            self.assertEquals(len(node.plugs), len(self.newGraph.nodes.values()[index].plugs))
+            for plugIndex, plug in enumerate(node.plugs.values()):
+                newGraphNode = self.newGraph.nodes.values()[index]
+                newGraphPlug = newGraphNode.plugs.values()[plugIndex]
+                self.assertEqual(plug.name, newGraphPlug.name)
+                self.assertEquals(len(plug.connections), 1)
+                self.assertEquals(len(newGraphPlug.connections), 1)
+                for plugConnection in plug.connections:
+                    self.assertIsInstance(plugConnection, baseEdge.Edge)
+                for plugConnection in newGraphPlug.connections:
+                    self.assertIsInstance(plugConnection, baseEdge.Edge)
         #
         #     self.assertIsInstance(savedGraph, dict)
         #     correctDict = {'className': 'Graph',

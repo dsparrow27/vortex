@@ -51,17 +51,17 @@ class TestBaseNode(unittest.TestCase):
         newNode.getPlug("value2").value = 50
         self.assertEquals(newPlug.dirty, True)
 
-    def testSerialize(self):
-        data = self.node.serialize()
-        correctData = {'className': 'BaseNode',
-                       'moduleName': 'baseNode',
-                       'modulePath': 'ds.vortex.core.baseNode',
-                       'name': 'testNode',
-                       'plugs': OrderedDict([('testPlug', {'moduleName': 'plug', 'name': 'testPlug', 'value': None,
-                                                           'className': 'InputPlug', 'io': 'input',
-                                                           'modulePath': 'ds.vortex.core.plug'})])}
-        self.assertIsInstance(data, dict)
-        self.assertEquals(data, correctData)
+    # def testSerialize(self):
+    #     data = self.node.serialize()
+    #     correctData = {'className': 'BaseNode',
+    #                    'moduleName': 'baseNode',
+    #                    'modulePath': 'ds.vortex.core.baseNode',
+    #                    'name': 'testNode',
+    #                    'plugs': OrderedDict([('testPlug', {'moduleName': 'plug', 'name': 'testPlug', 'value': None,
+    #                                                        'className': 'InputPlug', 'io': 'input',
+    #                                                        'modulePath': 'ds.vortex.core.plug'})])}
+    #     self.assertIsInstance(data, dict)
+    #     self.assertEquals(data, correctData)
 
 
 if __name__ == "__main__":

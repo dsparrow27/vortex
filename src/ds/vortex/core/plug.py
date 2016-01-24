@@ -30,7 +30,7 @@ class BasePlug(object):
         self.affects = set()
 
     def __repr__(self):
-        return "{}{}".format(self.__class__, self.__dict__)
+        return "{}{}".format(self.__class__.__name__, self.__dict__)
 
     def __len__(self):
         """returns the length of the connections
@@ -168,24 +168,6 @@ class BasePlug(object):
                 }
         return data
 
-    def log(self, tabLevel=-1):
-        """
-        :param tabLevel: int, the tab size
-        :return: str, the logged string that can be used to print
-        """
-        output = ""
-        tabLevel += 1
-
-        for i in range(tabLevel):
-            output += "\t"
-
-        output += "|------" + self.name + " ------connections -->> {}\n".format(self._connections)
-
-        tabLevel -= 1
-        output += "\n"
-
-        return output
-
     def fullPath(self):
         """Returns the fullpath of the plug , eg nodeName|plugName
         :return: str
@@ -253,7 +235,7 @@ class InputPlug(BasePlug):
         """
         if plug.isInput() or self.getConnection(plug):
             return
-        edge = baseEdge.Edge(self.name + "_" + plug.name, input=self, output=plug)
+        edge = baseEdge.Edge(self.name + "_" + plug.name, inputPlug=self, outputPlug=plug)
         if self._connections:
             self._connections[0].delete()
         # inputs can only have a single connection
@@ -297,7 +279,7 @@ class OutputPlug(BasePlug):
         if not self.isConnectedTo(plug):
             edge = plug.getConnection(self)
             if not edge:
-                edge = baseEdge.Edge("_".join([self.name, plug.name]), input=plug, output=self)
+                edge = baseEdge.Edge("_".join([self.name, plug.name]), inputPlug=plug, outputPlug=self)
             self._connections.append(edge)
             plug.connect(self)
             BasePlug.connect(self, plug, edge=edge)

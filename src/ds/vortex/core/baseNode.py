@@ -49,7 +49,7 @@ class BaseNode(object):
         self.initialize()
 
     def __repr__(self):
-        return "{}".format(self.name)
+        return "{0}{1}".format(self.__class__.__name__, self.__dict__)
 
     def __eq__(self, other):
         """Determines if the node and its plugs equal
@@ -149,27 +149,6 @@ class BaseNode(object):
         for plug in self._plugs.values():
             data["plugs"][plug.name] = plug.serialize()
         return data
-
-    def log(self, tabLevel=-1):
-        """Return the hierarchy for this node including the plugs
-        :param tabLevel: int, spacing
-        :return: str
-        """
-        output = ""
-        tabLevel += 1
-
-        for i in range(tabLevel):
-            output += "\t"
-
-        output += "|------" + self.name + "\n"
-
-        for child in self._plugs.values():
-            output += child.log(tabLevel)
-
-        tabLevel -= 1
-        output += "\n"
-
-        return output
 
 
 def getNode():

@@ -21,7 +21,7 @@ class TestGraph(unittest.TestCase):
         self.graph.addNode(self.testNode)
         testNode = baseNode.BaseNode("testNode1")
         self.graph.addNode(testNode)
-        self.assertEquals(testNode.name, "testNode10")
+        self.assertEquals(testNode.name, "testNode1")
 
     def testAddNode(self):
         self.assertEquals(self.graph.addNode(self.testNode), self.testNode)
@@ -133,94 +133,38 @@ class TestSerialize(unittest.TestCase):
         node2 = baseNode.BaseNode("testNode2")
         node.addPlug(plugs.InputPlug("testInputPlug", node=node))
         node.addPlug(plugs.OutputPlug("testOutputPlug", node=node))
-        node2.addPlug(plugs.InputPlug("testInputPlug2", node=node2))
-        node2.addPlug(plugs.OutputPlug("testOutputPlug2", node=node2))
-        node2.getPlug("testOutputPlug2").connect(node.getPlug("testInputPlug"))
+        node2.addPlug(plugs.InputPlug("testInputPlug", node=node2))
+        node2.addPlug(plugs.OutputPlug("testOutputPlug", node=node2))
+        node2.getPlug("testOutputPlug").connect(node.getPlug("testInputPlug"))
         self.graph.addNode(node)
         self.graph.addNode(node2)
 
         savedGraph = self.graph.serializeGraph()
-        print "loading>>>>>>>>>>>>>>>>>>>>>>>"
         self.newGraph = graph.Graph.loadGraph(savedGraph)
         self.assertEquals(len(self.graph), len(self.newGraph))
         self.assertEquals(self.graph._name, self.newGraph._name)
-
+        # logger.info(pprint.pformat(savedGraph))
+        # logger.info(pprint.pformat(self.newGraph))
+        # return
         for index, node in enumerate(self.graph.nodes.values()):
             self.assertEquals(len(node.plugs), len(self.newGraph.nodes.values()[index].plugs))
-            for plugIndex, plug in enumerate(node.plugs.values()):
-                newGraphNode = self.newGraph.nodes.values()[index]
-                newGraphPlug = newGraphNode.plugs.values()[plugIndex]
-                self.assertEqual(plug.name, newGraphPlug.name)
-                self.assertEquals(len(plug.connections), 1)
-                self.assertEquals(len(newGraphPlug.connections), 1)
-                for plugConnection in plug.connections:
-                    self.assertIsInstance(plugConnection, baseEdge.Edge)
-                for plugConnection in newGraphPlug.connections:
-                    self.assertIsInstance(plugConnection, baseEdge.Edge)
-        #
-        #     self.assertIsInstance(savedGraph, dict)
-        #     correctDict = {'className': 'Graph',
-        #                    'edges': {'testOutputPlug2_testInputPlug': {'arbitraryData': None,
-        #                                                                'className': 'Edge',
-        #                                                                'input': ('testInputPlug',
-        #                                                                          'testNode'),
-        #                                                                'moduleName': 'baseEdge',
-        #                                                                'modulePath': 'vortex.core.baseEdge',
-        #                                                                'name': 'testOutputPlug2_testInputPlug',
-        #                                                                'output': ('testOutputPlug2',
-        #                                                                           'testNode2')
-        #                                                                }
-        #                              },
-        #                    'moduleName': 'graph',
-        #                    'modulePath': 'vortex.core.graph',
-        #                    'name': 'serialGraph',
-        #                    'nodes': OrderedDict([('testNode', {'className': 'BaseNode', 'plugs': OrderedDict([(
-        #                        'testInputPlug',
-        #                        {
-        #                            'moduleName': 'plug',
-        #                            'name': 'testInputPlug',
-        #                            'value': None,
-        #                            'className': 'InputPlug',
-        #                            'io': 'input',
-        #                            'modulePath': 'vortex.core.plug'
-        #                        }), (
-        #                        'testOutputPlug',
-        #                        {
-        #                            'moduleName': 'plug',
-        #                            'name': 'testOutputPlug',
-        #                            'value': None,
-        #                            'className': 'OutputPlug',
-        #                            'io': 'output',
-        #                            'modulePath': 'vortex.core.plug'
-        #                        })]),
-        #                                                        'moduleName': 'baseNode', 'name': 'testNode',
-        #                                                        'modulePath': 'vortex.core.baseNode'
-        #                                                        }), ('testNode2', {'className': 'BaseNode',
-        #                                                                           'plugs': OrderedDict([('testInputPlug2', {
-        #                                                                               'moduleName': 'plug',
-        #                                                                               'name': 'testInputPlug2',
-        #                                                                               'value': None,
-        #                                                                               'className': 'InputPlug',
-        #                                                                               'io': 'input',
-        #                                                                               'modulePath': 'vortex.core.plug'
-        #                                                                           }), ('testOutputPlug2',
-        #                                                                                {'moduleName': 'plug',
-        #                                                                                 'name': 'testOutputPlug2',
-        #                                                                                 'value': None,
-        #                                                                                 'className': 'OutputPlug',
-        #                                                                                 'io': 'output',
-        #                                                                                 'modulePath': 'vortex.core.plug'
-        #                                                                                 })]), 'moduleName': 'baseNode',
-        #                                                                           'name': 'testNode2',
-        #                                                                           'modulePath': 'vortex.core.baseNode'
-        #                                                                           })]),
-        #                    'version': '1.0.0'
-        #                    }
-        #     self.assertEquals(savedGraph, correctDict)
+            # pprint.pprint( node), ">>>"
+            if node.name == "testNode":
+                for plugIndex, plug in enumerate(node.outputs()):
+                    newGraphNode = self.newGraph.nodes.values()[index]
+                    newGraphPlug = newGraphNode.outputs()[plugIndex]
+                    self.assertEqual(plug.name, newGraphPlug.name)
+                    # print newGraphPlug.connections
+                    self.assertEquals(len(newGraphPlug.connections), 1)
+                    self.assertEquals(len(plug.connections), 1)
+                    # for plugConnection in plug.connections:
+                    #     self.assertIsInstance(plugConnection, baseEdge.Edge)
+                    # for plugConnection in newGraphPlug.connections:
+                    #     self.assertIsInstance(plugConnection, baseEdge.Edge)
 
 
 if __name__ == "__main__":
     from ds.vortex import customLogger
 
-    logger = customLogger.getCustomLogger()
+    logger = customLogger.getCustomLogger(loglevel='DEBUG')
     unittest.main(verbosity=2)

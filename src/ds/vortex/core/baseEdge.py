@@ -11,20 +11,23 @@ class Edge(object):
     deleted = vortexEvent.VortexSignal()  # emit nothing
     connected = vortexEvent.VortexSignal()  # emit inputPlug instance, outputPlug instance
 
-    def __init__(self, name, input=None, output=None, arbitraryData=None):
+    def __init__(self, name, inputPlug=None, outputPlug=None):
         """
         :param name: str, the name for the edge
         :param input: InputPlug instance, the input plug instance
         :param output: OutputPlug instance, the output plug instance
-        :param arbitraryData: any extra edge data, should be serializable eg dict,list
         """
+
+        # print inputPlug.name, outputPlug.name
+        if inputPlug is not None and outputPlug is not None:
+            print "connecting"
+            self.connect(inputPlug, outputPlug)
         self.name = name
-        self.input = input
-        self.output = output
-        self.arbitraryData = arbitraryData
+        self.input = inputPlug
+        self.output = outputPlug
 
     def __repr__(self):
-        return "{0}{1}".format(self.__class__.__name__, self.__dict__)
+        return "{0} {1}".format(self.__class__.__name__, self.__dict__)
 
     def __eq__(self, other):
         return isinstance(other, Edge) and self.input == other.input and self.output == other.output
@@ -49,9 +52,11 @@ class Edge(object):
     def connect(self, input, output):
         self.input = input
         self.output = output
-        input._connection = [self]
+        input._connections = [self]
+        # print input._connections
         if self not in output.connections:
             output.connections.append(self)
+        # print output.connections, ":::::::"
         self.connected.emit(input, output)
 
     def serialize(self):

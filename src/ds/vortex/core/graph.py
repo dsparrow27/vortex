@@ -1,5 +1,4 @@
 import inspect
-import pprint
 from collections import OrderedDict
 
 import baseEdge
@@ -69,13 +68,9 @@ class Graph(object):
         """
 
         if self.hasNode(node):
-            # print node in self._nodes.values()
-            # print self.nodes, node.name
             return
         node.name = self.generateUniqueName(node)
-        # print node.name, "::::::::::::::"
         self._nodes[node.name] = node
-        # print self._nodes, "::::::"
         for plugName, plugValue in kwargs.iteritems():
             plug = node.getPlug(plugName)
             if plug.isInput():
@@ -191,19 +186,12 @@ class Graph(object):
                     plug.value = values.get("value")
                     continue
                 newNode.addPlugByType(ioType=values.get("io"), name=plugName, value=values.get("value"))
-            # print newNode,newNode.name, ">>>>>"
             graph.addNode(newNode)
 
         for edge in graphData["edges"].values():
-            # print graph.nodes
-            print edge["input"][0]
-            print graph.getNode(edge["input"][1]).plugs
             inputPlug = graph.getNode(edge["input"][1]).getPlug(edge["input"][0])
             outputPlug = graph.getNode(edge["output"][1]).getPlug(edge["output"][0])
-            newEdge = baseEdge.Edge(name=edge["name"], input=inputPlug, output=outputPlug)
-            print inputPlug
-            print outputPlug
-
-            newEdge.connect(inputPlug, outputPlug)
-
+            # print inputPlug.name, outputPlug.name
+            edge = baseEdge.Edge(name=edge["name"], inputPlug=inputPlug, outputPlug=outputPlug)
+            # print edge
         return graph

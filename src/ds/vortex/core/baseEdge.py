@@ -20,7 +20,6 @@ class Edge(object):
 
         # print inputPlug.name, outputPlug.name
         if inputPlug is not None and outputPlug is not None:
-            print "connecting"
             self.connect(inputPlug, outputPlug)
         self.name = name
         self.input = inputPlug
@@ -53,10 +52,8 @@ class Edge(object):
         self.input = input
         self.output = output
         input._connections = [self]
-        # print input._connections
         if self not in output.connections:
             output.connections.append(self)
-        # print output.connections, ":::::::"
         self.connected.emit(input, output)
 
     def serialize(self):

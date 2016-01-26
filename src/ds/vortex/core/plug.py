@@ -122,9 +122,8 @@ class BasePlug(object):
         :param plug:
         :return:
         """
-        for edge in self._connections:
-            if edge.isConnected(self, plug):
-                return True
+        if any(edge.isConnected(self, plug) for edge in self._connections):
+            return True
         return False
 
     def getConnection(self, plug):
@@ -148,14 +147,12 @@ class BasePlug(object):
                 edge.delete()
                 self.connectionRemoved.emit(edge)
 
-    def connect(self, plug, edge=None):
+    def connect(self, plug):
         """Connects two attributes together if self isInput type then if there's a current connections then this gets
         replaced.
         :param plug: BasePlug, InputPlug or Outputplug instance
-        :return: edge
         """
         log.debug("connected plugs::".format(plug.name, self.name))
-        self.connectionAdded.emit(plug, edge)
 
     def serialize(self):
         """Serializes the plug as a dict
@@ -227,22 +224,18 @@ class InputPlug(BasePlug):
             plug.dirty = value
         self.dirtyStateChanged.emit(self, value)
 
-    def connect(self, plug, edge=None):
-        """creates a connection between to plugs, a input can only have one input so current connections is cleared
+    def connect(self, plug):
+        """Creates a connection between to plugs, a input can only have one input so current connections is cleared
         before creating the new connection
-        :param plug:
+        :param plug: BasePlug instance
+
         :return:
         """
         if plug.isInput() or self.getConnection(plug):
             return
         edge = baseEdge.Edge(self.name + "_" + plug.name, inputPlug=self, outputPlug=plug)
-        if self._connections:
-            self._connections[0].delete()
-        # inputs can only have a single connection
-        self._connections = [edge]
-        plug.connect(self)
         self.dirty = True
-        BasePlug.connect(self, plug, edge=edge)
+        self.connectionAdded.emit(edge)
         return edge
 
 
@@ -280,7 +273,8 @@ class OutputPlug(BasePlug):
             edge = plug.getConnection(self)
             if not edge:
                 edge = baseEdge.Edge("_".join([self.name, plug.name]), inputPlug=plug, outputPlug=self)
-            self._connections.append(edge)
-            plug.connect(self)
-            BasePlug.connect(self, plug, edge=edge)
+                self.connectionAdded.emit(edge)
+                return edge
+            edge.connect(plug, self)
+            self.connectionAdded.emit(edge)
             return edge

@@ -55,6 +55,7 @@ class VortexSignal(object):
         :param kwargs: dict, same as args
         :return: None
         """
+
         for event in self.events:
             logger.debug("Calling event :: %s" % event)
             event(*args, **kwargs)

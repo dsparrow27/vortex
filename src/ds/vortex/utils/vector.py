@@ -27,8 +27,13 @@ class Vector(object):
         """
         self.vec[key] = value
 
-    def length(self):
-        return math.sqrt(sum(x * x for x in self.vec))
+    def __add__(self, vec):
+        """Adds two vectors together and the returns the resulting example
+        :param vec: Vector2D or flost3
+        :return: Vector2D
+        """
+        assert len(self.vec) == len(vec)
+        return Vector([self.vec[i] + vec[i] for i in range(len(self))])
 
     def __sub__(self, vec):
         """Subtracts the two vectors
@@ -36,6 +41,9 @@ class Vector(object):
         :return: Vector2D
         """
         return self + (-vec)
+
+    def length(self):
+        return math.sqrt(sum(x * x for x in self.vec))
 
     @property
     def x(self):

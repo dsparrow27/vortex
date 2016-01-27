@@ -74,7 +74,6 @@ class BaseNode(object):
     def addPlug(self, plug, clean=False):
         """Adds a plug to self
         :param plug: Plug instance to add
-        :param value: any type, This argument get passed to the plug value attribute
         :param clean: sets the new plug dirty state, this gets set after the value is set
         """
         self._plugs[plug.name] = plug

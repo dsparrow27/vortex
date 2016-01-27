@@ -119,12 +119,10 @@ class BasePlug(object):
 
     def isConnectedTo(self, plug):
         """Determines if self is connected to the plug, calls on BaseEdge.isConnected()
-        :param plug:
-        :return:
+        :param plug: Plug instance
+        :return: bool
         """
-        if any(edge.isConnected(self, plug) for edge in self._connections):
-            return True
-        return False
+        return any(edge.isConnected(self, plug) for edge in self._connections)
 
     def getConnection(self, plug):
         """returns the edge that is connected to the plug and self

@@ -50,10 +50,8 @@ class Edge(object):
         self.input = input
         self.output = output
         input._connections = [self]
-        # print input._connections
         if self not in output.connections:
             output.connections.append(self)
-        # print output.connections, ":::::::"
         self.connected.emit(input, output)
 
     def serialize(self):

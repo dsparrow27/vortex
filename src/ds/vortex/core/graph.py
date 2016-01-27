@@ -1,11 +1,11 @@
 import inspect
 from collections import OrderedDict
-
 import baseEdge
 from ds.vortex import customLogger
 from ds.vortex.core import baseNode
 from ds.vortex.core import vortexEvent
 from ds.vortex import nodes
+
 logger = customLogger.getCustomLogger()
 
 
@@ -26,7 +26,7 @@ class Graph(object):
         """
         :param name: str, the name of the graph
         """
-        self.liveMode = False
+        self._edges = OrderedDict()
         self._name = name
         self._nodes = OrderedDict()
 
@@ -47,7 +47,10 @@ class Graph(object):
         :param index: int, the node index
         :return: Node
         """
-        return self._nodes.values()[index]
+        if index in range(self._nodes.values()):
+            return self._nodes.values()[index]
+        elif index in range(self._edges.values()):
+            return self._edges.values()[index]
 
     def __contains__(self, node):
         """Returns a bool if the node is in the graph
@@ -75,6 +78,9 @@ class Graph(object):
             plug = node.getPlug(plugName)
             if plug.isInput():
                 plug.value = plugValue
+        for plug in node.plugs.values():
+            plug.connectionAdded.connect(self.addEdge)
+            plug.connectionRemoved.connect(self.deleteEdge)
         self.addedNode.emit(node)
         return node
 
@@ -113,6 +119,34 @@ class Graph(object):
         """
         return node.name in self._nodes.keys()
 
+    @property
+    def edges(self):
+        """Returns a dict of the graph edges
+        :return: Dict
+        """
+        return self._edges
+
+    def getEdge(self, edgeName):
+        """Returns a edge if the edge name is in edges
+        :param edgeName: str, th name of the edge
+        :return:
+        """
+        return self._edges.get(edgeName)
+
+    def addEdge(self, edge):
+        """Adds the edge to the graph
+        :param edge: Edge
+        """
+        if edge not in self._edges.values():
+            self._edges[edge.name] = edge
+
+    def deleteEdge(self, edge):
+        """Removes the edge from the graph
+        :param edge: Edge
+        """
+        if edge in self._edges.values():
+            del self._edges[edge.name]
+
     def generateUniqueName(self, node):
         """Create a unique name for the node in the graph, on node creation a digit is appended , eg nodeName00, nodeName01
         :param node: node Instance
@@ -121,18 +155,17 @@ class Graph(object):
         value = "%0{}d".format(0)
         uIndex = 0
         name = node.name
-        # print name, "::::"
         while name in self._nodes:
-            # print "innerloop"
             name = node.name + value % uIndex
             uIndex += 1
         return name
 
     def clear(self):
-        """Clears all the nodes from the graph
+        """Clears all the nodes and the edges from the graph
         :return: None
         """
         self._nodes.clear()
+        self._edges.clear()
 
     def allLeaves(self):
         """Returns all the leaf nodes in the graph, a Leaf node is any node that has on connections
@@ -160,9 +193,9 @@ class Graph(object):
         logger.debug(serializedGraph)
         for node in self._nodes.values():
             serializedGraph["nodes"][node.name] = node.serialize()
-            for plug in node.outputs():
-                for edge in plug.connections:
-                    serializedGraph["edges"][edge.name] = edge.serialize()
+        for edge in self._edges.values():
+            serializedGraph["edges"][edge.name] = edge.serialize()
+
         return serializedGraph
 
     @classmethod
@@ -185,13 +218,13 @@ class Graph(object):
                 if plug:
                     plug.value = values.get("value")
                     continue
+                #?????????????????????????????
                 newNode.addPlugByType(ioType=values.get("io"), name=plugName, value=values.get("value"))
             graph.addNode(newNode)
 
         for edge in graphData["edges"].values():
             inputPlug = graph.getNode(edge["input"][1]).getPlug(edge["input"][0])
             outputPlug = graph.getNode(edge["output"][1]).getPlug(edge["output"][0])
-            # print inputPlug.name, outputPlug.name
-            edge = baseEdge.Edge(name=edge["name"], inputPlug=inputPlug, outputPlug=outputPlug)
-            # print edge
+            baseEdge.Edge(name=edge["name"], inputPlug=inputPlug, outputPlug=outputPlug)
+
         return graph

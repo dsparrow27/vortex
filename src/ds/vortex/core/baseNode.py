@@ -81,13 +81,13 @@ class BaseNode(object):
 
         if clean:
             plug.dirty = False
+        return plug
 
     def addPlugByType(self, ioType, name, value=None):
         if ioType == "input":
-            self.addPlug(plug.InputPlug(name=name, node=self, value=value))
-        else:
-            self.addPlug(plug.OutputPlug(name=name, node=self, value=value))
-        return self.getPlug(name)
+            return self.addPlug(plug.InputPlug(name=name, node=self, value=value))
+
+        return self.addPlug(plug.OutputPlug(name=name, node=self, value=value))
 
     def getPlug(self, plugName):
         """Returns the plug based on the name
@@ -107,21 +107,13 @@ class BaseNode(object):
         """Finds and returns all the inputs for self
         :return: list(Plug)
         """
-        inputs = []
-        for plug in self._plugs.values():
-            if plug.isInput():
-                inputs.append(plug)
-        return inputs
+        return [p for p in self._plugs.values() if p.isInput()]
 
     def outputs(self):
         """Finds and returns all the outputs for self
         :return: list(Plug)
         """
-        outputs = []
-        for plug in self._plugs.values():
-            if plug.isOutput():
-                outputs.append(plug)
-        return outputs
+        return [p for p in self._plugs.values() if p.isOutput()]
 
     def initialize(self):
         """Intended to be overridden, this method is for cresting plugs, for the node before this node gets computed for the first time
@@ -136,7 +128,7 @@ class BaseNode(object):
         """
         logger.debug("Computing {}".format(self.name))
         self.computed.emit(self, requestPlug)
-        return None
+        return
 
     def serialize(self):
         """Returns a dict of the nodes data

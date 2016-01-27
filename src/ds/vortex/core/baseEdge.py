@@ -14,13 +14,10 @@ class Edge(object):
     def __init__(self, name, inputPlug=None, outputPlug=None):
         """
         :param name: str, the name for the edge
-        :param input: InputPlug instance, the input plug instance
-        :param output: OutputPlug instance, the output plug instance
+        :param inputPlug: InputPlug instance, the input plug instance
+        :param outputPlug: OutputPlug instance, the output plug instance
         """
-
-        # print inputPlug.name, outputPlug.name
         if inputPlug is not None and outputPlug is not None:
-            print "connecting"
             self.connect(inputPlug, outputPlug)
         self.name = name
         self.input = inputPlug

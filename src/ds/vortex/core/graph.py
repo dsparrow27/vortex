@@ -78,6 +78,20 @@ class Graph(object):
         self.addedNode.emit(node)
         return node
 
+    def deleteNode(self, node):
+        """Removes a node from the graph
+        :param node: the node instance to delete
+        """
+        del self._nodes[node.name]
+        self.removedNode.emit(node)
+
+    def getNode(self, nodeName):
+        """Returns a node based on the name or empty list
+        :param nodeName: the name of the node to get
+        :return:Node instance
+        """
+        return self._nodes.get(nodeName)
+
     @property
     def nodes(self):
         """Returns all the nodes in the graph
@@ -98,20 +112,6 @@ class Graph(object):
         :return: bool
         """
         return node.name in self._nodes.keys()
-
-    def deleteNode(self, node):
-        """Removes a node from the graph
-        :param node: the node instance to delete
-        """
-        del self._nodes[node.name]
-        self.removedNode.emit(node)
-
-    def getNode(self, nodeName):
-        """Returns a node based on the name or empty list
-        :param nodeName: the name of the node to get
-        :return:Node instance
-        """
-        return self._nodes.get(nodeName)
 
     def generateUniqueName(self, node):
         """Create a unique name for the node in the graph, on node creation a digit is appended , eg nodeName00, nodeName01

@@ -4,7 +4,7 @@ import baseEdge
 from ds.vortex import customLogger
 from ds.vortex.core import baseNode
 from ds.vortex.core import vortexEvent
-from ds.vortex import nodes
+from ds.vortex.nodes import allNodes
 
 logger = customLogger.getCustomLogger()
 
@@ -21,6 +21,8 @@ class Graph(object):
     """
     addedNode = vortexEvent.VortexSignal()
     removedNode = vortexEvent.VortexSignal()
+    addedEdge = vortexEvent.VortexSignal()
+    deletedEdge = vortexEvent.VortexSignal()
 
     def __init__(self, name=""):
         """
@@ -84,20 +86,6 @@ class Graph(object):
         self.addedNode.emit(node)
         return node
 
-    def deleteNode(self, node):
-        """Removes a node from the graph
-        :param node: the node instance to delete
-        """
-        del self._nodes[node.name]
-        self.removedNode.emit(node)
-
-    def getNode(self, nodeName):
-        """Returns a node based on the name or empty list
-        :param nodeName: the name of the node to get
-        :return:Node instance
-        """
-        return self._nodes.get(nodeName)
-
     @property
     def nodes(self):
         """Returns all the nodes in the graph
@@ -117,7 +105,21 @@ class Graph(object):
         :param node: node instance
         :return: bool
         """
-        return node.name in self._nodes.keys()
+        return node in self._nodes.values()
+
+    def deleteNode(self, node):
+        """Removes a node from the graph
+        :param node: the node instance to delete
+        """
+        del self._nodes[node.name]
+        self.removedNode.emit(node)
+
+    def getNode(self, nodeName):
+        """Returns a node based on the name or empty list
+        :param nodeName: the name of the node to get
+        :return:Node instance
+        """
+        return self._nodes.get(nodeName)
 
     @property
     def edges(self):
@@ -139,13 +141,16 @@ class Graph(object):
         """
         if edge not in self._edges.values():
             self._edges[edge.name] = edge
+            self.addedEdge.emit(edge)
 
     def deleteEdge(self, edge):
         """Removes the edge from the graph
         :param edge: Edge
         """
         if edge in self._edges.values():
+            tmpEdge = edge
             del self._edges[edge.name]
+            self.deletedEdge.emit(tmpEdge)
 
     def generateUniqueName(self, node):
         """Create a unique name for the node in the graph, on node creation a digit is appended , eg nodeName00, nodeName01
@@ -212,7 +217,7 @@ class Graph(object):
             if moduleName == "baseNode":
                 newNode = baseNode.BaseNode(name=nodeName)
             else:
-                newNode = nodes.getNode(node.get("moduleName"))(name=nodeName)
+                newNode = allNodes.getNode(node.get("moduleName"))(name=nodeName)
             for plugName, values in node.get("plugs").iteritems():
                 plug = newNode.getPlug(plugName=plugName)
                 if plug:

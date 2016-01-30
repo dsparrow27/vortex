@@ -52,11 +52,13 @@ class BasePlug(object):
         :return: None
         """
         self._dirty = value
+        print self.name, value
         if self.isConnected():
             for edge in self.connections:
                 if edge.input.dirty:
                     continue
-                edge.input.dirty = True
+                edge.input.dirty = value
+                print edge.input.name, value
         self.dirtyStateChanged.emit(self, value)
 
     @property
@@ -171,6 +173,12 @@ class BasePlug(object):
 
 
 class InputPlug(BasePlug):
+    dirtyStateChanged = vortexEvent.VortexSignal()  # emits plug instance, dirty state (bool)
+    valueChanged = vortexEvent.VortexSignal()  # emits plug instance, plug value
+    valueRequested = vortexEvent.VortexSignal()  # emits plug instance, plug value
+    connectionAdded = vortexEvent.VortexSignal()  # emits plug instance, edge instance
+    connectionRemoved = vortexEvent.VortexSignal()  # emits edge instance
+
     def __init__(self, name, node=None, value=None):
         """
         :param name: str, the name for the plug
@@ -215,6 +223,7 @@ class InputPlug(BasePlug):
 
     @dirty.setter
     def dirty(self, value):
+        print self.name, value
         self._dirty = value
         for plug in self.affects:
             if plug.dirty:
@@ -238,6 +247,7 @@ class InputPlug(BasePlug):
 
 
 class OutputPlug(BasePlug):
+
     def __init__(self, name, node=None, value=None):
         """
         :param name: str, the name for the plug

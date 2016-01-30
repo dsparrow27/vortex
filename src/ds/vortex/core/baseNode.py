@@ -71,7 +71,7 @@ class BaseNode(object):
         """
         return self._plugs
 
-    def addPlug(self, plug, clean=False):
+    def addPlug(self, plug, clean=True):
         """Adds a plug to self
         :param plug: Plug instance to add
         :param clean: sets the new plug dirty state, this gets set after the value is set

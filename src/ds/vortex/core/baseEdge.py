@@ -11,7 +11,7 @@ class Edge(object):
     deleted = vortexEvent.VortexSignal()  # emit nothing
     connected = vortexEvent.VortexSignal()  # emit inputPlug instance, outputPlug instance
 
-    def __init__(self, name, inputPlug=None, outputPlug=None):
+    def __init__(self, name="edge", inputPlug=None, outputPlug=None):
         """
         :param name: str, the name for the edge
         :param inputPlug: InputPlug instance, the input plug instance
@@ -19,6 +19,8 @@ class Edge(object):
         """
         if inputPlug is not None and outputPlug is not None:
             self.connect(inputPlug, outputPlug)
+        if not name and inputPlug and outputPlug:
+            self.name = inputPlug.name + "_" + outputPlug.name
         self.name = name
         self.input = inputPlug
         self.output = outputPlug
@@ -30,6 +32,9 @@ class Edge(object):
         return isinstance(other, Edge) and self.input == other.input and self.output == other.output
 
     def delete(self):
+        """Preps for deletion by first disconnecting the edge from the plug.
+        Emit the deleted signal
+        """
         self.input._connections = []
         for index, connection in enumerate(self.output.connections):
             if connection == self:
@@ -52,6 +57,7 @@ class Edge(object):
         input._connections = [self]
         if self not in output.connections:
             output.connections.append(self)
+        self.input.dirty = True
         self.connected.emit(input, output)
 
     def serialize(self):

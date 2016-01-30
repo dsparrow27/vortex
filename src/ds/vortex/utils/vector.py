@@ -42,8 +42,32 @@ class Vector(object):
         """
         return self + (-vec)
 
+    def __neg__(self):
+        """Negates the vector
+        :return: Vector2D, return the negative of the vector, eg (1,-1,2) == (-1,1,-2)
+        """
+        return Vector([vec * -1 for vec in self.vec])
+
+    def __mul__(self, vec):
+        """Dot product(scalar product) of two vectors. Takes Two equal length vectors and returns a single number.
+        :param vec: Vector2D instance or float3
+        :return: Vector2D
+        """
+        assert len(self.vec) == len(vec)
+        return sum(Vector([self.vec[i] * vec[i] for i in range(len(self.vec))]))
+
+    def __rmul__(self, scalar):
+        return Vector([x * scalar for x in self.vec])
+
     def length(self):
         return math.sqrt(sum(x * x for x in self.vec))
+
+    def normalize(self):
+        length = self.length()
+        return Vector2D([x / length for x in self.vec])
+
+    def crossProduct(self):
+        pass
 
     @property
     def x(self):

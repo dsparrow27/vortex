@@ -4,8 +4,7 @@
     "className": "Graph", 
     "edges": {
         "testOutputPlug2_testInputPlug": {
-            "arbitraryData": null, 
-            "name": "testOutputPlug2_testInputPlug", 
+            "name": "testOutputPlug2_testInputPlug",
             "moduleName": "baseEdge",
             "output": [
                 "testOutputPlug2", 

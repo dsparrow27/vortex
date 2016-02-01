@@ -26,7 +26,7 @@ from directories import copyFiles
 from directories import filesInDirectories
 from directories import rename
 from directories import subDirectories
-from math.basic import add
+from math.basic import sum
 from math.basic import absolute
 from math.basic import divide
 from math.basic import floor

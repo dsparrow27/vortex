@@ -1,7 +1,6 @@
 import unittest
-
+from ds.vortex import customLogger
 from ds.vortex.core import baseEdge
-
 from ds.vortex.core import plug
 
 
@@ -9,8 +8,8 @@ class TestCase(unittest.TestCase):
     def setUp(self):
         self.inputPlug = plug.InputPlug("inputPlug1")
         self.outputPlug = plug.OutputPlug("outputPlug1")
-        self.edge = baseEdge.Edge("testEdge1", input=self.inputPlug, output=self.outputPlug)
-        self.edge2 = baseEdge.Edge("testEdg2", input=self.inputPlug, output=self.outputPlug)
+        self.edge = baseEdge.Edge("testEdge1", inputPlug=self.inputPlug, outputPlug=self.outputPlug)
+        self.edge2 = baseEdge.Edge("testEdg2", inputPlug=self.inputPlug, outputPlug=self.outputPlug)
 
     def testEquality(self):
         edge3 = baseEdge.Edge("testEdg2")
@@ -27,28 +26,7 @@ class TestCase(unittest.TestCase):
         self.assertTrue(self.edge.isConnected(self.inputPlug, self.outputPlug))
         self.assertFalse(edge3.isConnected(self.inputPlug, self.outputPlug))
 
-    # def testSerialize(self):
-    #     data = self.edge.serialize()
-    #     correctData = {'arbitraryData': None,
-    #                    'className': 'Edge',
-    #                    'input': ('inputPlug1', None),
-    #                    'moduleName': 'baseEdge',
-    #                    'modulePath': 'ds.vortex.core.baseEdge',
-    #                    'name': 'testEdge1',
-    #                    'output': ('outputPlug1', None)
-    #                    }
-    #     incorrectData = {"name": "test",
-    #                      "input": "input",
-    #                      "output": None,
-    #                      "arbitraryData": None
-    #                      }
-    #     self.assertIsInstance(data, dict)
-    #     self.assertEquals(data, correctData)
-    #     self.assertNotEquals(data, incorrectData)
-
 
 if __name__ == "__main__":
-    from vortex import customLogger
-
     logger = customLogger.getCustomLogger()
     unittest.main(verbosity=2)

@@ -13,7 +13,7 @@ class Graph(object):
     """This graph class stores the nodes and will evaluate the graph on request.
     Simple example:
     gx = Graph("newGraph")
-    t = addNode.AddNode("newMathNode") # first create an instance of the node
+    t = sumNode.SumNode("newMathNode") # first create an instance of the node
     gx.addNode(t) # adds a node to the graph
     gx.getNode("newMathNode") # gets node by name
     if t in gx:
@@ -42,17 +42,7 @@ class Graph(object):
         return len(self._nodes)
 
     def __eq__(self, other):
-        return isinstance(other, Graph) and self._nodes == other.nodes
-
-    def __getitem__(self, index):
-        """Gets a node from the graph via a index
-        :param index: int, the node index
-        :return: Node
-        """
-        if index in range(self._nodes.values()):
-            return self._nodes.values()[index]
-        elif index in range(self._edges.values()):
-            return self._edges.values()[index]
+        return isinstance(other, Graph) and self._nodes == other.nodes and self._edges == other.edges
 
     def __contains__(self, node):
         """Returns a bool if the node is in the graph
@@ -63,6 +53,21 @@ class Graph(object):
             return node in self._nodes.values()
         except TypeError:
             return False
+
+    def get(self, fullPath):
+        """Returns the node/edge/plug based on the fullPath rg. "testNode|output" would  the output plug
+        :param fullPath: str
+        :return: Node,Plug,edge
+        """
+        for node in self._nodes.values():
+            if node.fullPath() == fullPath:
+                return node
+            for plug in node.plugs.values():
+                if plug.fullPath() == fullPath:
+                    return plug
+        for edge in self._edges.values():
+            if edge.fullPath() == fullPath:
+                return edge
 
     def addNode(self, node, **kwargs):
         """Adds a Node instance to the graph this will also add the node to the graph class instance as a attribute
@@ -111,6 +116,7 @@ class Graph(object):
         """Removes a node from the graph
         :param node: the node instance to delete
         """
+        node.disconnectAll()
         del self._nodes[node.name]
         self.removedNode.emit(node)
 
@@ -159,7 +165,13 @@ class Graph(object):
         """
         value = "%0{}d".format(0)
         uIndex = 0
-        name = node.name
+        currentIndex = [int(i) for i in node.name if i.isdigit()]
+        if currentIndex:
+            uIndex = sum(currentIndex)
+            name = node.name.split(str(uIndex))[0]
+        else:
+            name = node.name
+
         while name in self._nodes:
             name = node.name + value % uIndex
             uIndex += 1
@@ -223,7 +235,6 @@ class Graph(object):
                 if plug:
                     plug.value = values.get("value")
                     continue
-                #?????????????????????????????
                 newNode.addPlugByType(ioType=values.get("io"), name=plugName, value=values.get("value"))
             graph.addNode(newNode)
 

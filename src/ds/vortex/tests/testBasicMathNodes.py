@@ -1,6 +1,6 @@
 import unittest
 from ds.vortex.nodes.math.basic import absolute
-from ds.vortex.nodes.math.basic import add
+from ds.vortex.nodes.math.basic import sum
 from ds.vortex.nodes.math.basic import divide
 from ds.vortex.nodes.math.basic import floor
 from ds.vortex.nodes.math.basic import invert
@@ -27,7 +27,7 @@ class TestAbsoluteNode(unittest.TestCase):
 
 class TestAddNode(unittest.TestCase):
     def setUp(self):
-        self.node = add.AddNode("add")
+        self.node = sum.SumNode("add")
 
     def testCompute(self):
         inputPlug1 = self.node.getPlug("value1")

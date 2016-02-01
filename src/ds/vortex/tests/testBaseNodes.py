@@ -1,9 +1,7 @@
 import unittest
-from collections import OrderedDict
 
 from ds.vortex.core import baseNode
-from ds.vortex.nodes.math.basic import add
-
+from ds.vortex.nodes.math.basic import sum
 from ds.vortex.core import plug
 
 
@@ -38,7 +36,7 @@ class TestBaseNode(unittest.TestCase):
         self.assertEqual(self.node.getPlugAffects(inputPlug2), set([outputPlug1, outputPlug2]))
 
     def testAttributeAffectsDirty(self):
-        newNode = add.AddNode("addNode")
+        newNode = sum.SumNode("addNode")
         valuePlug = newNode.getPlug("value1")
         newPlug = plug.OutputPlug(name="testPlug", node=newNode)
         newNode.addPlug(newPlug, clean=True)

@@ -8,8 +8,6 @@ logger = customLogger.getCustomLogger()
 class Edge(object):
     """Base class for graph edges , a simple class that holds the connection values of plugs,
     """
-    deleted = vortexEvent.VortexSignal()  # emit nothing
-    connected = vortexEvent.VortexSignal()  # emit inputPlug instance, outputPlug instance
 
     def __init__(self, name="edge", inputPlug=None, outputPlug=None):
         """
@@ -17,10 +15,13 @@ class Edge(object):
         :param inputPlug: InputPlug instance, the input plug instance
         :param outputPlug: OutputPlug instance, the output plug instance
         """
+        self.deleted = vortexEvent.VortexSignal()  # emit nothing
+        self.connected = vortexEvent.VortexSignal()  # emit inputPlug instance, outputPlug instance
+
         if inputPlug is not None and outputPlug is not None:
             self.connect(inputPlug, outputPlug)
         if not name and inputPlug and outputPlug:
-            self.name = inputPlug.name + "_" + outputPlug.name
+            self.name = "_".join([outputPlug.name, inputPlug.name])
         self.name = name
         self.input = inputPlug
         self.output = outputPlug
@@ -30,6 +31,9 @@ class Edge(object):
 
     def __eq__(self, other):
         return isinstance(other, Edge) and self.input == other.input and self.output == other.output
+
+    def fullPath(self):
+        return self.name
 
     def delete(self):
         """Preps for deletion by first disconnecting the edge from the plug.

@@ -140,10 +140,18 @@ class BasePlug(object):
         :return: None
         """
         log.debug("Could not find plug in connections")
-        for edge in self._connections:
+        for index, edge in enumerate(self._connections):
             if edge.isConnected(self, plug):
                 edge.delete()
                 self.connectionRemoved.emit(edge)
+
+    def disconnectAll(self):
+        """Removes all connections for the plug, emit the connectionRemoved signal
+        """
+        for index, edge in enumerate(self._connections):
+            edge.delete()
+            self.connectionRemoved.emit(edge)
+            del self._connections[index]
 
     def connect(self, plug):
         """Connects two attributes together if self isInput type then if there's a current connections then this gets
@@ -267,7 +275,7 @@ class OutputPlug(BasePlug):
         self._value = value
 
     def connect(self, plug, edge=None):
-        if not self.isConnectedTo(plug):
+        if not self.isConnectedTo(plug) or not plug.isOutput():
             edge = plug.getConnection(self)
             if not edge:
                 edge = baseEdge.Edge("_".join([self.name, plug.name]), inputPlug=plug, outputPlug=self)

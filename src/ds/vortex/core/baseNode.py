@@ -12,11 +12,6 @@ logger = cusLogger.getCustomLogger()
 class BaseNode(object):
     """Core node class that stores the all the plugs, initialize and compute methods must be overridden in custom nodes
     """
-    addedPlug = vortexEvent.VortexSignal(),  # emits the plug added
-    deletedPlug = vortexEvent.VortexSignal()  # emits the deleted plug
-    computed = vortexEvent.VortexSignal()  # emits the node instance computed and the outputPlug
-    initializing = vortexEvent.VortexSignal()  # emits the node instance
-
     @staticmethod
     def plugAffects(inputPlug, outputPlug):
         """Add a link between to plugs on the same node, gets added to affects variable, designed to be used in subclasses
@@ -44,8 +39,14 @@ class BaseNode(object):
         """
         :param name: str, the name of the node
         """
+
+        self.addedPlug = vortexEvent.VortexSignal(),  # emits the plug added
+        self.deletedPlug = vortexEvent.VortexSignal()  # emits the deleted plug
+        self.computed = vortexEvent.VortexSignal()  # emits the node instance computed and the outputPlug
+        self.initializing = vortexEvent.VortexSignal()  # emits the node instance
         self.name = name
         self._plugs = OrderedDict()
+
         self.initialize()
 
     def __repr__(self):
@@ -88,6 +89,13 @@ class BaseNode(object):
 
         return self.addPlug(plug.OutputPlug(name=name, node=self, value=value))
 
+    def disconnectAll(self):
+        """Loops through all plugs and disconnects all connections from all pluga
+        :return None
+        """
+        for plug in self._plugs.values():
+            plug.disconnectAll()
+
     def getPlug(self, plugName):
         """Returns the plug based on the name
         :param plugName: str, the plug name to get
@@ -113,6 +121,13 @@ class BaseNode(object):
         :return: list(Plug)
         """
         return [p for p in self._plugs.values() if p.isOutput()]
+
+    def fullPath(self):
+        """Return the full path of the node
+        @note add the graph into the path
+        :return:
+        """
+        return self.name
 
     def initialize(self):
         """Intended to be overridden, this method is for cresting plugs, for the node before this node gets computed for the first time

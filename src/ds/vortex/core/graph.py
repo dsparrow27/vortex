@@ -167,13 +167,11 @@ class Graph(object):
         uIndex = 0
         currentIndex = [int(i) for i in node.name if i.isdigit()]
         if currentIndex:
-            uIndex = sum(currentIndex)
-            name = node.name.split(str(uIndex))[0]
+            name = node.name.split(str(sum(currentIndex)))[0]
         else:
             name = node.name
-
         while name in self._nodes:
-            name = node.name + value % uIndex
+            name = name + value % uIndex
             uIndex += 1
         return name
 
@@ -240,6 +238,7 @@ class Graph(object):
 
         for edge in graphData["edges"].values():
             inputPlug = graph.getNode(edge["input"][1]).getPlug(edge["input"][0])
+            # print graph.getNode(edge["output"][1]), ">>>>>>", edge["output"][1], graph.nodes.keys()
             outputPlug = graph.getNode(edge["output"][1]).getPlug(edge["output"][0])
             baseEdge.Edge(name=edge["name"], inputPlug=inputPlug, outputPlug=outputPlug)
 

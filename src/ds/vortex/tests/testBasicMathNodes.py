@@ -1,6 +1,6 @@
 import unittest
+
 from ds.vortex.nodes.math.basic import absolute
-from ds.vortex.nodes.math.basic import sum
 from ds.vortex.nodes.math.basic import divide
 from ds.vortex.nodes.math.basic import floor
 from ds.vortex.nodes.math.basic import invert
@@ -9,6 +9,7 @@ from ds.vortex.nodes.math.basic import multiply
 from ds.vortex.nodes.math.basic import power
 from ds.vortex.nodes.math.basic import squareRoot
 from ds.vortex.nodes.math.basic import subtract
+from ds.vortex.nodes.math.basic import sum
 
 
 class TestAbsoluteNode(unittest.TestCase):
@@ -166,7 +167,7 @@ class TestSubtractNode(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    from vortex import customLogger
+    import logging
 
-    logger = customLogger.getCustomLogger()
+    logger = logging.getLogger(__name__)
     unittest.main(verbosity=2)

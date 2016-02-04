@@ -1,9 +1,10 @@
 import inspect
-from ds.vortex import customLogger as customLogger
+import logging
+
 from ds.vortex.core import baseEdge
 from ds.vortex.core import vortexEvent
 
-log = customLogger.getCustomLogger()
+log = logging.getLogger(__name__)
 
 
 class BasePlug(object):
@@ -151,7 +152,6 @@ class BasePlug(object):
         for index, edge in enumerate(self._connections):
             edge.delete()
             self.connectionRemoved.emit(edge)
-            del self._connections[index]
 
     def connect(self, plug):
         """Connects two attributes together if self isInput type then if there's a current connections then this gets

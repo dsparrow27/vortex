@@ -1,5 +1,6 @@
+import logging
 import unittest
-from ds.vortex import customLogger
+
 from ds.vortex.core import baseEdge
 from ds.vortex.core import plug
 
@@ -28,5 +29,5 @@ class TestCase(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    logger = customLogger.getCustomLogger()
+    logger = logging.getLogger(__name__)
     unittest.main(verbosity=2)

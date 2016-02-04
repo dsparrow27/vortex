@@ -1,8 +1,9 @@
 import inspect
-from ds.vortex import customLogger as customLogger
+import logging
+
 from ds.vortex.core import vortexEvent
 
-logger = customLogger.getCustomLogger()
+logger = logging.getLogger(__name__)
 
 
 class Edge(object):

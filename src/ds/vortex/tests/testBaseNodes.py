@@ -1,8 +1,8 @@
 import unittest
 
 from ds.vortex.core import baseNode
-from ds.vortex.nodes.math.basic import sum
 from ds.vortex.core import plug
+from ds.vortex.nodes.math.basic import sum
 
 
 class TestBaseNode(unittest.TestCase):
@@ -63,7 +63,7 @@ class TestBaseNode(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    from ds.vortex import customLogger
+    import logging
 
-    logger = customLogger.getCustomLogger()
+    logger = logging.getLogger(__name__)
     unittest.main(verbosity=2)

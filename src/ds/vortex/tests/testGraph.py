@@ -1,10 +1,10 @@
-import pprint
-import unittest
 import logging
+import unittest
+
 from ds.vortex.core import baseNode
+from ds.vortex.core import graph
 from ds.vortex.core import plug as plugs
 from ds.vortex.nodes.math.basic import sum
-from ds.vortex.core import graph
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class TestGraph(unittest.TestCase):
     def testDeleteNode(self):
         self.graph.addNode(self.testNode)
         self.graph.deleteNode(self.testNode)
-        self.assertEquals(len(self.graph.nodes), 0)
+        self.assertEquals(len(self.graph.nodes.values()), 0)
 
     def testGetNode(self):
         self.graph.addNode(self.testNode)
@@ -146,7 +146,4 @@ class TestSerialize(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    from ds.vortex import customLogger
-
-    logger = customLogger.getCustomLogger(loglevel='DEBUG')
     unittest.main(verbosity=2)

@@ -1,12 +1,13 @@
 """Code module for a graph node.
 """
 import inspect
+import logging
 from collections import OrderedDict
+
 import plug
-from ds.vortex import customLogger as cusLogger
 from ds.vortex.core import vortexEvent
 
-logger = cusLogger.getCustomLogger()
+logger = logging.getLogger(__name__)
 
 
 class BaseNode(object):

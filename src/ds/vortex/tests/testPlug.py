@@ -36,7 +36,6 @@ class TestPlug(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    from vortex import customLogger
-
-    logger = customLogger.getCustomLogger()
+    import logging
+    logger = logging.getLogger(__name__)
     unittest.main(verbosity=2)

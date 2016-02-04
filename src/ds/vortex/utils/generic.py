@@ -1,7 +1,7 @@
-from ds.vortex import customLogger
 import json
+import logging
 
-logger = customLogger.getCustomLogger()
+logger = logging.getLogger(__name__)
 
 
 def loadJson(filePath):

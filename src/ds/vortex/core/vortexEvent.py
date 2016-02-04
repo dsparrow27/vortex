@@ -1,6 +1,6 @@
-from ds.vortex import customLogger
+import logging
 
-logger = customLogger.getCustomLogger()
+logger = logging.getLogger(__name__)
 
 
 class VortexSignal(object):

@@ -1,12 +1,13 @@
 import inspect
+import logging
 from collections import OrderedDict
+
 import baseEdge
-from ds.vortex import customLogger
 from ds.vortex.core import baseNode
 from ds.vortex.core import vortexEvent
 from ds.vortex.nodes import allNodes
 
-logger = customLogger.getCustomLogger()
+logger = logging.getLogger(__name__)
 
 
 class Graph(object):
@@ -116,6 +117,8 @@ class Graph(object):
         """Removes a node from the graph
         :param node: the node instance to delete
         """
+        if isinstance(node, str):
+            node = self.getNode(node)
         node.disconnectAll()
         del self._nodes[node.name]
         self.removedNode.emit(node)
@@ -145,8 +148,13 @@ class Graph(object):
         """Adds the edge to the graph
         :param edge: Edge
         """
+        print "trying to add edge"
+        if isinstance(edge, str):
+            edge = self.getEdge(edge)
+
         if edge not in self._edges.values():
             self._edges[edge.name] = edge
+            print "creating edge"
             self.addedEdge.emit(edge)
 
     def deleteEdge(self, edge):
@@ -238,8 +246,7 @@ class Graph(object):
 
         for edge in graphData["edges"].values():
             inputPlug = graph.getNode(edge["input"][1]).getPlug(edge["input"][0])
-            # print graph.getNode(edge["output"][1]), ">>>>>>", edge["output"][1], graph.nodes.keys()
             outputPlug = graph.getNode(edge["output"][1]).getPlug(edge["output"][0])
-            baseEdge.Edge(name=edge["name"], inputPlug=inputPlug, outputPlug=outputPlug)
+            graph.addEdge(baseEdge.Edge(name=edge["name"], inputPlug=inputPlug, outputPlug=outputPlug))
 
         return graph

@@ -1,6 +1,5 @@
 import unittest
 
-from ds.vortex import customLogger
 from ds.vortex.core import vortexEvent
 
 
@@ -28,5 +27,4 @@ class TestEventHandler(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    customLogger.getCustomLogger()
     unittest.main(verbosity=2)

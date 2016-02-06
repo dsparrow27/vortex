@@ -234,8 +234,7 @@ class InputPlug(BasePlug):
         """Creates a connection between to plugs, a input can only have one input so current connections is cleared
         before creating the new connection
         :param plug: BasePlug instance
-
-        :return:
+        :return: Edge
         """
         if plug.isInput() or self.getConnection(plug):
             return

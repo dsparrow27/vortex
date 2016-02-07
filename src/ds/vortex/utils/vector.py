@@ -16,6 +16,9 @@ class Vector(object):
     def __repr__(self):
         return "{0}{1}".format(type(self).__name__, self.__dict__)
 
+    def __eq__(self, vec):
+        return isinstance(vec, Vector) and self.vec == vec.vec
+
     def __len__(self):
         """Returns the length, if its a vector2d then length 2 will be returned
         :return:

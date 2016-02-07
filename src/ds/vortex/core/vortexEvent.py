@@ -1,6 +1,6 @@
-from ds.vortex import customLogger
+import logging
 
-logger = customLogger.getCustomLogger()
+logger = logging.getLogger(__name__)
 
 
 class VortexSignal(object):
@@ -55,6 +55,7 @@ class VortexSignal(object):
         :param kwargs: dict, same as args
         :return: None
         """
+
         for event in self.events:
             logger.debug("Calling event :: %s" % event)
             event(*args, **kwargs)

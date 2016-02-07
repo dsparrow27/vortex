@@ -3,7 +3,7 @@ Very simple example for creating and adding nodes to a graph
 """
 from ds.vortex.core import graph
 from ds.vortex.nodes.constants import scalar
-from ds.vortex.nodes.math.basic import add
+from ds.vortex.nodes.math.basic import sum
 from ds.vortex.nodes.math.basic import multiply
 
 
@@ -14,7 +14,7 @@ def testExample():
     # first create an instance of a node from the nodeLibrary
     scalar1 = scalar.ScalarNode(name="scalar1")
     scalar2 = scalar.ScalarNode(name="scalar2")
-    add1 = add.AddNode(name="testAddNode")
+    add1 = sum.SumNode(name="testAddNode")
     mult1 = multiply.MultiplyNode(name="testMultiply")
     # create the graph, the graph is the main interface for getting and adding nodes
     gx = graph.Graph(name="newGraph")

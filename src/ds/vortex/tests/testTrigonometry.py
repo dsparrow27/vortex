@@ -1,14 +1,13 @@
+import logging
 import math
 import unittest
 
-from ds.vortex import customLogger
 from ds.vortex.nodes.math.trigonometry import arccos
+from ds.vortex.nodes.math.trigonometry import arcsin
 from ds.vortex.nodes.math.trigonometry import arctan
 from ds.vortex.nodes.math.trigonometry import cos
 from ds.vortex.nodes.math.trigonometry import sin
 from ds.vortex.nodes.math.trigonometry import tan
-
-from ds.vortex.nodes.math.trigonometry import arcsin
 
 
 class TestMathArcCosNode(unittest.TestCase):
@@ -129,5 +128,5 @@ class TestMathTanNode(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    logging = customLogger.getCustomLogger()
+    logging = logging.getLogger(__name__)
     unittest.main(verbosity=2)

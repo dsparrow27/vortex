@@ -1,10 +1,8 @@
 import unittest
-from collections import OrderedDict
 
 from ds.vortex.core import baseNode
-from ds.vortex.nodes.math.basic import add
-
 from ds.vortex.core import plug
+from ds.vortex.nodes.math.basic import sum
 
 
 class TestBaseNode(unittest.TestCase):
@@ -38,7 +36,7 @@ class TestBaseNode(unittest.TestCase):
         self.assertEqual(self.node.getPlugAffects(inputPlug2), set([outputPlug1, outputPlug2]))
 
     def testAttributeAffectsDirty(self):
-        newNode = add.AddNode("addNode")
+        newNode = sum.SumNode("addNode")
         valuePlug = newNode.getPlug("value1")
         newPlug = plug.OutputPlug(name="testPlug", node=newNode)
         newNode.addPlug(newPlug, clean=True)
@@ -51,21 +49,21 @@ class TestBaseNode(unittest.TestCase):
         newNode.getPlug("value2").value = 50
         self.assertEquals(newPlug.dirty, True)
 
-    def testSerialize(self):
-        data = self.node.serialize()
-        correctData = {'className': 'BaseNode',
-                       'moduleName': 'baseNode',
-                       'modulePath': 'ds.vortex.core.baseNode',
-                       'name': 'testNode',
-                       'plugs': OrderedDict([('testPlug', {'moduleName': 'plug', 'name': 'testPlug', 'value': None,
-                                                           'className': 'InputPlug', 'io': 'input',
-                                                           'modulePath': 'ds.vortex.core.plug'})])}
-        self.assertIsInstance(data, dict)
-        self.assertEquals(data, correctData)
+    # def testSerialize(self):
+    #     data = self.node.serialize()
+    #     correctData = {'className': 'BaseNode',
+    #                    'moduleName': 'baseNode',
+    #                    'modulePath': 'ds.vortex.core.baseNode',
+    #                    'name': 'testNode',
+    #                    'plugs': OrderedDict([('testPlug', {'moduleName': 'plug', 'name': 'testPlug', 'value': None,
+    #                                                        'className': 'InputPlug', 'io': 'input',
+    #                                                        'modulePath': 'ds.vortex.core.plug'})])}
+    #     self.assertIsInstance(data, dict)
+    #     self.assertEquals(data, correctData)
 
 
 if __name__ == "__main__":
-    from ds.vortex import customLogger
+    import logging
 
-    logger = customLogger.getCustomLogger()
+    logger = logging.getLogger(__name__)
     unittest.main(verbosity=2)

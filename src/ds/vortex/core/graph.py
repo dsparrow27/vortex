@@ -1,18 +1,20 @@
 import inspect
+import logging
 from collections import OrderedDict
 
 import baseEdge
-from ds.vortex import customLogger
+from ds.vortex.core import baseNode
 from ds.vortex.core import vortexEvent
+from ds.vortex.nodes import allNodes
 
-logger = customLogger.getCustomLogger()
+logger = logging.getLogger(__name__)
 
 
 class Graph(object):
     """This graph class stores the nodes and will evaluate the graph on request.
     Simple example:
     gx = Graph("newGraph")
-    t = addNode.AddNode("newMathNode") # first create an instance of the node
+    t = sumNode.SumNode("newMathNode") # first create an instance of the node
     gx.addNode(t) # adds a node to the graph
     gx.getNode("newMathNode") # gets node by name
     if t in gx:
@@ -20,12 +22,14 @@ class Graph(object):
     """
     addedNode = vortexEvent.VortexSignal()
     removedNode = vortexEvent.VortexSignal()
+    addedEdge = vortexEvent.VortexSignal()
+    deletedEdge = vortexEvent.VortexSignal()
 
     def __init__(self, name=""):
         """
         :param name: str, the name of the graph
         """
-        self.liveMode = False
+        self._edges = OrderedDict()
         self._name = name
         self._nodes = OrderedDict()
 
@@ -39,20 +43,7 @@ class Graph(object):
         return len(self._nodes)
 
     def __eq__(self, other):
-        return isinstance(other, Graph) and self._nodes == other.nodes
-
-    def __iter__(self):
-        """Iterates the nodes in the graph
-        :return: iter
-        """
-        return iter(self._nodes.values())
-
-    def __getitem__(self, index):
-        """Gets a node from the graph via a index
-        :param index: int, the node index
-        :return: Node
-        """
-        return self._nodes.values()[index]
+        return isinstance(other, Graph) and self._nodes == other.nodes and self._edges == other.edges
 
     def __contains__(self, node):
         """Returns a bool if the node is in the graph
@@ -64,6 +55,21 @@ class Graph(object):
         except TypeError:
             return False
 
+    def get(self, fullPath):
+        """Returns the node/edge/plug based on the fullPath rg. "testNode|output" would  the output plug
+        :param fullPath: str
+        :return: Node,Plug,edge
+        """
+        for node in self._nodes.values():
+            if node.fullPath() == fullPath:
+                return node
+            for plug in node.plugs.values():
+                if plug.fullPath() == fullPath:
+                    return plug
+        for edge in self._edges.values():
+            if edge.fullPath() == fullPath:
+                return edge
+
     def addNode(self, node, **kwargs):
         """Adds a Node instance to the graph this will also add the node to the graph class instance as a attribute
         which can be accessed by graph.node
@@ -71,6 +77,7 @@ class Graph(object):
         :param kwargs: plugName=plugValue, the kwargs sets the input plugs value.
         :return Node instance
         """
+
         if self.hasNode(node):
             return
         node.name = self.generateUniqueName(node)
@@ -79,6 +86,9 @@ class Graph(object):
             plug = node.getPlug(plugName)
             if plug.isInput():
                 plug.value = plugValue
+        for plug in node.plugs.values():
+            plug.connectionAdded.connect(self.addEdge)
+            plug.connectionRemoved.connect(self.deleteEdge)
         self.addedNode.emit(node)
         return node
 
@@ -107,6 +117,9 @@ class Graph(object):
         """Removes a node from the graph
         :param node: the node instance to delete
         """
+        if isinstance(node, str):
+            node = self.getNode(node)
+        node.disconnectAll()
         del self._nodes[node.name]
         self.removedNode.emit(node)
 
@@ -117,26 +130,65 @@ class Graph(object):
         """
         return self._nodes.get(nodeName)
 
+    @property
+    def edges(self):
+        """Returns a dict of the graph edges
+        :return: Dict
+        """
+        return self._edges
+
+    def getEdge(self, edgeName):
+        """Returns a edge if the edge name is in edges
+        :param edgeName: str, th name of the edge
+        :return:
+        """
+        return self._edges.get(edgeName)
+
+    def addEdge(self, edge):
+        """Adds the edge to the graph
+        :param edge: Edge
+        """
+        print "trying to add edge"
+        if isinstance(edge, str):
+            edge = self.getEdge(edge)
+
+        if edge not in self._edges.values():
+            self._edges[edge.name] = edge
+            print "creating edge"
+            self.addedEdge.emit(edge)
+
+    def deleteEdge(self, edge):
+        """Removes the edge from the graph
+        :param edge: Edge
+        """
+        if edge in self._edges.values():
+            tmpEdge = edge
+            del self._edges[edge.name]
+            self.deletedEdge.emit(tmpEdge)
+
     def generateUniqueName(self, node):
         """Create a unique name for the node in the graph, on node creation a digit is appended , eg nodeName00, nodeName01
         :param node: node Instance
         :return: str, returns the new node name as a string
         """
-        increObj = IncrementObject(0, 1)
-        num = increObj.add()
-        if node.name not in self._nodes:
-            return node.name
-        name = node.name + num
+        value = "%0{}d".format(0)
+        uIndex = 0
+        currentIndex = [int(i) for i in node.name if i.isdigit()]
+        if currentIndex:
+            name = node.name.split(str(sum(currentIndex)))[0]
+        else:
+            name = node.name
         while name in self._nodes:
-            name = node.name + increObj.add()
-
+            name = name + value % uIndex
+            uIndex += 1
         return name
 
     def clear(self):
-        """Clears all the nodes from the graph
+        """Clears all the nodes and the edges from the graph
         :return: None
         """
         self._nodes.clear()
+        self._edges.clear()
 
     def allLeaves(self):
         """Returns all the leaf nodes in the graph, a Leaf node is any node that has on connections
@@ -159,17 +211,14 @@ class Graph(object):
                            "version": "1.0.0",
                            "nodes": OrderedDict(),
                            "edges": dict(),
-                           "className": type(self).__name__,
-                           "moduleName": inspect.getmodulename(__file__),
-                           "modulePath": __file__.replace("\\", ".").split("src.")[-1].replace(".pyc", "").replace(
-                               ".py", "")
+                           "moduleName": inspect.getmodulename(__file__)
                            }
         logger.debug(serializedGraph)
         for node in self._nodes.values():
             serializedGraph["nodes"][node.name] = node.serialize()
-            for plug in node.outputs():
-                for edge in plug.connections:
-                    serializedGraph["edges"][edge.name] = edge.serialize()
+        for edge in self._edges.values():
+            serializedGraph["edges"][edge.name] = edge.serialize()
+
         return serializedGraph
 
     @classmethod
@@ -180,47 +229,24 @@ class Graph(object):
         """
         graph = cls(name=graphData.get("name"))
         for node in graphData["nodes"].values():
-            modulePath = node.get("modulePath")
-            try:
-                module = __import__(modulePath, globals(), locals(), [node.get("moduleName")], -1)
-            except ImportError, er:
-                logger.error("""importing {0} Failed! , have you typed the right name?,
-                    check nodes package.""".format(modulePath))
-                raise er
-            newNode = module.getNode()(name=node.get("name"))
-            newNode.addPlugsFromDict(node.get("plugs"))
+            moduleName = node.get("moduleName")
+            nodeName = node.get("name")
 
+            if moduleName == "baseNode":
+                newNode = baseNode.BaseNode(name=nodeName)
+            else:
+                newNode = allNodes.getNode(node.get("moduleName"))(name=nodeName)
+            for plugName, values in node.get("plugs").iteritems():
+                plug = newNode.getPlug(plugName=plugName)
+                if plug:
+                    plug.value = values.get("value")
+                    continue
+                newNode.addPlugByType(ioType=values.get("io"), name=plugName, value=values.get("value"))
             graph.addNode(newNode)
 
         for edge in graphData["edges"].values():
             inputPlug = graph.getNode(edge["input"][1]).getPlug(edge["input"][0])
             outputPlug = graph.getNode(edge["output"][1]).getPlug(edge["output"][0])
-            newEdge = baseEdge.Edge(name=edge["name"], input=inputPlug, output=outputPlug)
-            inputPlug.connections = [newEdge]
-            outputPlug.connections.append(newEdge)
+            graph.addEdge(baseEdge.Edge(name=edge["name"], inputPlug=inputPlug, outputPlug=outputPlug))
 
         return graph
-
-
-class IncrementObject(object):
-    """A class to help with incrementing a number with a padding
-    """
-
-    def __init__(self, startNumber, padding):
-        """initializes the seq number with start number and a padding value, use self.add() to add one number
-        :param startNumber: int, the number for the sequence to start at
-        :param padding: int, the number of numbers(zeros) to add in front of the seq number
-        """
-        self.seq = startNumber
-        self.padding = padding
-        self.currentValue = ""
-
-    def add(self):
-        """Increments the seq by and adds a padding value
-        :return: str
-        """
-        value = "%0{}d".format(self.padding)
-        value = value % self.seq
-        self.seq += 1
-        self.currentValue = value
-        return value

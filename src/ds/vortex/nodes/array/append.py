@@ -3,6 +3,12 @@ from ds.vortex.core import plug as plugs
 
 
 class ArrayAppend(baseNode.BaseNode):
+    """Appends a passed object into a list
+    plugs:
+        value1: The list to append to.
+        value2: The object to append
+        output: the combined list
+    """
     def __init__(self, name):
         """
         :param name: str, the name of the node

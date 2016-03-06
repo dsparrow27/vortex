@@ -20,7 +20,7 @@ class Test2DVector(unittest.TestCase):
         self.assertNotEquals([2, 6], self.vector)
         self.assertNotEquals(vector.Vector([2.0, 3.5]), self.vector)
         vector2 = vector.Vector(self.vec)
-        self.assertEquals(vector2.vec, vector.Vector[2.0, 3.0])
+        self.assertEquals(vector2.vec, vector.Vector([2.0, 3.0]))
         self.assertEquals(vector2 + vector2, vector.Vector([4.0, 6.0]))
 
     def testAdd(self):
